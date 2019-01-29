@@ -23,13 +23,13 @@ class EdReportAPI {
         foreach ($settings as $variable => $value) {
             $this->$variable = $value;
         }
-        
+
         //default to testing environment!
         if ( isset($this->environment) && $this->environment=='LIVE') $this->url="https://api.edreports.org/v2/";
         else $this->url = "https://st.edreports.org/api/v2/";
-        
+
     }
-    
+
     /**
      * Set debug varilable to False
      */
@@ -49,7 +49,7 @@ class EdReportAPI {
      */
     public function debugLog($m) {
         if ($this->debug !== FALSE) {
-            
+
             if ($this->debug > 1) :
                 echo "<pre>";
                 print_r($m);
@@ -100,7 +100,7 @@ class EdReportAPI {
     }
 
     /**
-     * Retrieve series.  
+     * Retrieve series.
      * @param int $age in minutes
      */
     public function series($publisher = '', $subject = '', $page = 1, $perpage = 5) {
@@ -131,7 +131,7 @@ class EdReportAPI {
     }
 
     /**
-     * Retrieve reports. 
+     * Retrieve reports.
      * @param int $age in minutes
      */
     public function reports($subject = '', $grade = '', $publisher = '', $page = 1, $perpage = 5) {
@@ -163,7 +163,7 @@ class EdReportAPI {
     }
 
     /**
-     * Retrieve reports. 
+     * Retrieve reports.
      * @param int $age in minutes
      */
     public function reportTypes() {
@@ -206,17 +206,17 @@ class EdReportAPI {
      * @throws Exception
      */
     private function checkInfo() {
-        
+
         if ( empty($this->url) ) throw new \Exception('Missing URL.');
         if (empty($this->apikey)) throw new \Exception('Missing API Key.');
-        
+
         switch ($this->authType):
             case 'basic':
                 if (empty($this->userName))
                     throw new \Exception('Missing Username.');
                 if (empty($this->password))
                     throw new \Exception('Missing Password.');
-                break;                
+                break;
             case 'none': return true; //no auth, always have what we need!
             default:
                 die('Unknown Auth Type'); //unknown auth type, so bail!
@@ -227,18 +227,18 @@ class EdReportAPI {
      * Actually go to the endpoint and retrieve the data list
      * @param string $endpoint
      * @param int $page
-     * @return mixed 
+     * @return mixed
      * @throws Exception
      */
     private function getDataDetails($endpoint, $id) {
         $this->debugLog(__FUNCTION__);
 
-        //Just in case we need to loop pages!                
+        //Just in case we need to loop pages!
         $this->checkInfo();
         $final = $this->url . $endpoint . '/' . $id;
-        $this->debugLog('Using the url of ' . $final);
+        $this->debugLog('Using the datadetails url of ' . $final);
         $final .="?" . http_build_query (['key'=> $this->apikey]); //if we are using an api key, set it here!
-        
+        $this->debugLog($final);
         $process = curl_init($final);
         switch ($this->authType) :
             case 'basic':
@@ -260,7 +260,9 @@ class EdReportAPI {
             $this->debugLog('Curl Return Code:' . $httpCode);
             return false;
         } else {
+            var_dump($return);
             $dataObject = json_decode($return);
+            var_dump($dataObject);
             if (!$dataObject) {
                 $this->debugLog('Unable to interpret data: ' . print_r($dataObject, TRUE));
                 return false;
@@ -274,29 +276,29 @@ class EdReportAPI {
      * Actually go to the endpoint and retrieve the data list
      * @param string $endpoint
      * @param int $page
-     * @return mixed 
+     * @return mixed
      * @throws Exception
      */
     private function getDataList($endpoint, $parameters = []) {
         $this->debugLog(__FUNCTION__);
 
-        //Just in case we need to loop pages!                
+        //Just in case we need to loop pages!
         $this->checkInfo();
-                
-        
+
+
         $param_string = '';
         if (empty($parameters)) {
             $parameters['mt']=1;
-        };        
-        $param_string = '?' . http_build_query($parameters);        
+        };
+        $param_string = '?' . http_build_query($parameters);
         $final = $this->url . $endpoint . $param_string;
-        $this->debugLog('Using the url of ' . $final);
+        $this->debugLog('Using the datalist url of ' . $final);
         $process = curl_init($final . '&' . http_build_query ( ['key'=> $this->apikey]) );
         switch ($this->authType):
             case 'basic' :
                 $this->debugLog('Using Basic Auth Type, ' . $this->userName . ':' . str_repeat("*", strlen($this->password) ) );
                 curl_setopt($process, CURLOPT_USERPWD, $this->userName . ":" . $this->password);
-            break;            
+            break;
         endswitch;
 
         curl_setopt($process, CURLOPT_TIMEOUT, 30);

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="On explicit save action" createEmptyFolders="true" autoUploadExternalChanges="true">
+  <component name="PublishConfigData" autoUpload="On explicit save action" serverName="NIMC - STAGING" createEmptyFolders="true" autoUploadExternalChanges="true">
     <serverData>
       <paths name="COMDEV">
         <serverdata>
@@ -27,6 +27,13 @@
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="NIMC - STAGING">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/wp-content/plugins/wpedreports" local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>

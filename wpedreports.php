@@ -44,7 +44,7 @@ function debugAPI() {
   [report_type] => ela-9-12
   )
 
- * 
+ *
  */
 
 //add_filter('the_content', 'debugAPI');
@@ -78,7 +78,7 @@ add_action('wp_ajax_nopriv_edreportnextpage', 'edreportnextpage_func');
 
 function edrep_filter_bar($atts = [], $content = '') {
     $atts = shortcode_atts(array(
-        'subject' => '27', //5->MATH, 27->ELA (but should get from db instead)                
+        'subject' => '27', //5->MATH, 27->ELA (but should get from db instead)
             ), $atts, 'edrep_listing');
     extract($atts);
     ob_start();
@@ -116,7 +116,7 @@ function edrep_filter_bar($atts = [], $content = '') {
                                     <div class='fakeCheckBox' title='High School' data-val='hs' alt='High School'>HS</div>
                                     <!-- input type='checkbox' name='grades[]' value='hs' checked='CHECKED' / -->
                                 </label>
-                            <?php endif ?>     
+                            <?php endif ?>
                             <label>
                                 <div class='gradeToggle'>Toggle Selection</div>
                             </label>
@@ -135,7 +135,7 @@ function edrep_filter_bar($atts = [], $content = '') {
                 </div>
             </div>
         </div>
-    </form>    
+    </form>
     <?php
     return ob_get_clean();
 }
@@ -144,7 +144,7 @@ add_shortcode('edrep_filter_bar', 'edrep_filter_bar');
 
 function edrep_listing($atts, $content = '') {
     $atts = shortcode_atts(array(
-        'subject' => '27', //5->MATH, 27->ELA (but should get from db instead)        
+        'subject' => '27', //5->MATH, 27->ELA (but should get from db instead)
         'perpage' => 10
             ), $atts, 'edrep_listing');
     extract($atts);
@@ -197,7 +197,7 @@ function inject_edreport_modal() {
                             <fieldset class="partially-meets">
                                 <legend>Alignment</legend>
                                 <div class="scales">
-                                    <a href="#" class="half ga-processed gw-1" target="_blank">                    
+                                    <a href="#" class="half ga-processed gw-1" target="_blank">
                                         <p class="ttl">&nbsp;</p>
                                         <div class="scale expectations ">
                                             <ul class='animated fadeInLeft' style=''></ul>
@@ -205,8 +205,8 @@ function inject_edreport_modal() {
                                         <div class="scale indices">
                                             <ul></ul>
                                         </div>
-                                    </a>							
-                                    <a href="#" class="half ga-processed gw-2" target="_blank">                    
+                                    </a>
+                                    <a href="#" class="half ga-processed gw-2" target="_blank">
                                         <p class="ttl">&nbsp;</p>
                                         <div class="scale expectations ">
                                             <ul class='animated fadeInLeft' style=''></ul>
@@ -214,19 +214,19 @@ function inject_edreport_modal() {
                                         <div class="scale indices">
                                             <ul></ul>
                                         </div>
-                                    </a>		               
+                                    </a>
                                 </div>
 
                                 <div class="status">
                                     <div>
                                         <span></span>
-                                    </div>                
+                                    </div>
                                 </div>
                             </fieldset>
                             <fieldset class="did-not-review">
                                 <legend>Usability</legend>
                                 <div class="scales">
-                                    <a href="#" target="_blank" class="ga-processed gw-3">                    
+                                    <a href="#" target="_blank" class="ga-processed gw-3">
                                         <p class="ttl">&nbsp;</p>
                                         <div class="scale expectations tooltipster tooltipstered">
                                             <ul class='animated fadeInLeft' style=''></ul>
@@ -234,7 +234,7 @@ function inject_edreport_modal() {
                                         <div class="scale indices">
                                             <ul></ul>
                                         </div>
-                                    </a>		                
+                                    </a>
                                 </div>
 
                                 <div class="status">
@@ -248,7 +248,7 @@ function inject_edreport_modal() {
                                 </div>
                             </fieldset>
                         </div>
-                    </div> 
+                    </div>
                 </div>
 
             </div>
@@ -267,9 +267,12 @@ function format_edseries($d) {
     <div class='edrep_review' id='edrep_<?= $d->id; ?>'>
         <div class='edrep_title'>
             <h2>
-                <?= $d->title; ?>                
+                <?= $d->title; ?>
             </h2>
-            <span><?= $d->publisher; ?> | <?= $d->grades_description; ?><?php if (!empty($d->edition)) { ?> | <?= $d->edition; ?> Edition<?php } ?></span>
+            <span><?= $d->publisher; ?>
+                <?php if (!empty($d->grades_description)) { ?> | <?= $d->grades_description; ?><?php } ?>
+                <?php if (!empty($d->edition)) { ?> | <?= $d->edition; ?> Edition<?php } ?>
+            </span>
         </div>
         <div class='edrep_body'>
             <div class='row'>
@@ -284,7 +287,7 @@ function format_edseries($d) {
                     </div>
                 </div>
                 <?php
-                $seriesReports = $wpHelper->seriesReports($d->id);                
+                $seriesReports = $wpHelper->seriesReports($d->id);
                 $sts = count($seriesReports);
                 if ($sts === 0 || $sts === 1)
                     $sts = 1;
@@ -299,8 +302,8 @@ function format_edseries($d) {
                         if (!empty($seriesReports))
                             foreach ($seriesReports as $report) :
                                 $data = unserialize(base64_decode($report->data));
-                                
-                                
+
+
                                 if ( empty($data) ) return;
                                 if ($data->gateway_1_rating == 'meets' && $data->gateway_2_rating == 'meets' && $data->gateway_3_rating == 'meets') {
                                     $status = 'meets';
@@ -320,13 +323,13 @@ function format_edseries($d) {
                                     <div style='display:none'>
                                         <?php print_r($data); ?>
                                     </div>
-                                     * 
+                                     *
                                      */?>
                                     <p class="report-detail">
                                         <a href="<?= str_replace(['//api.', '//st.'],'//',$data->report_url); ?>" tabindex="0" target="_blank" class="ga-processed" title='View Full Report on EdReports.org'><?= $report->description; ?></a>
                                     </p>
                                     <div class="report-descr">
-                                        
+
                                         <?php if (empty($data)): ?>
                                             <a href='javascript:void(0)'>
                                                 <div>
@@ -337,7 +340,7 @@ function format_edseries($d) {
                                                 </div>
                                             </a>
                                         <?php else: ?>
-                                        
+
                                             <a href="<?= $data->report_url; ?>" tabindex="0" target="_blank" class="ga-processed">
                                                 <div>
                                                     <span class="circle <?= $status; ?>"><span class='fas fa-<?php
@@ -354,7 +357,7 @@ function format_edseries($d) {
                                                     </span>
                                                 </div>
                                             </a>
-                                        
+
                                             <a href="<?= $data->report_url; ?>" tabindex="0" target="_blank" class="ga-processed alignment-status-text">
                                                 <div>
                                                     <?php
@@ -368,14 +371,14 @@ function format_edseries($d) {
                                                         default: echo $s;
                                                     endswitch;
                                                     ?> <span class="iamalink">Learn more</span>
-                                                </div> 
+                                                </div>
                                             </a>
 
                                         <?php endif; ?>
                                     </div>
-                                    
-                                    
-                                    
+
+
+
                                     <p class="report-link" title='View Report Gateway Scores'>
                                         <?php
                                         $repdata = [
@@ -392,23 +395,24 @@ function format_edseries($d) {
                                             'score' => (isset($data->gateway_2_points) ? $data->gateway_2_points : '0'),
                                             'rating' => (isset($data->gateway_2_rating) ? $data->gateway_2_rating : '-')
                                         ];
-                                        
+
                                         $repdata['gw_3'] = [
                                             'score' => (isset($data->gateway_3_points) ? $data->gateway_3_points : '0' ),
                                             'rating' => (isset($data->gateway_3_rating) ? $data->gateway_3_rating : '-')
-                                        ];                                        
+                                        ];
                                         ?>
                                         <a href="javascript:void(0);" data-series-id="<?= $d->id; ?>" tabindex="0" data-report='<?= json_encode($repdata); ?>'>REPORT BREAKDOWN</a>
                                     </p>
                                     <?php /* */ ?>
-                                    <div style="display:none;">                                        
+                                    <div style="display:none;">
                                         <pre>
+                                            <?= print_r($d); ?>
                                             <?= print_r($repdata); ?>
                                             <?= print_r($data); ?>
                                         </pre>
                                     </div>
                                     <?php /* */ ?>
-                                </div>                        
+                                </div>
                             <?php endforeach; ?>
                     </div>
                 </div>
@@ -463,7 +467,7 @@ function wpedreports_admin_notice__nuke_failed() {
 
 function wpedreports_init() {
     enqueueStylesScripts();
-    if (is_admin()) {        
+    if (is_admin()) {
         if (isset($_POST['edreports_manual_update'])) {
             $function = $_POST['edreports_manual_update'];
             $limit = !empty( (int)$_POST['limit']) ? (int) $_POST['limit'] : 5;
@@ -474,12 +478,12 @@ function wpedreports_init() {
                 case 'subjects': nde_edreports_datapull_subjects_func();
                     $results='noupdates';
                     break;
-                case 'publishers': nde_edreports_datapull_publishers_func($limit);                    
+                case 'publishers': nde_edreports_datapull_publishers_func($limit);
                     break;
                 case 'reports': nde_edreports_datapull_reports_func();
                     $results='noupdates';
                     break;
-                case 'reportsdetails': $results = nde_edreports_datapull_reports_details_func($limit);                    
+                case 'reportsdetails': $results = nde_edreports_datapull_reports_details_func($limit);
                     break;
                 case 'types': nde_edreports_datapull_reporttypes_func();
                     $results='noupdates';
@@ -493,9 +497,9 @@ function wpedreports_init() {
                 case 'seriesdetails': $results = nde_edreports_datapull_series_details_func($limit);
                     break;
             }
-            
-            
-            
+
+
+
             if ( isset($_POST['loop']) && $_POST['loop']=="1" ) {
                 if ( !isset($results) || $results!='noupdates') {
                 ?>
@@ -506,7 +510,7 @@ function wpedreports_init() {
                 <?php
                 }
             }
-            
+
             die('FINISHED');
         }
 
@@ -622,11 +626,11 @@ function nde_edreports_datapull_reports_details_func($limit=15) {
     if ( defined( 'DOING_CRON' ) ) $debug=1;
     else $debug=2;
     $wpHelper = new NDE\WPHelper($debug);
-    $results = $wpHelper->updateReportDetails($limit);    
+    $results = $wpHelper->updateReportDetails($limit);
     error_log('Finished running ' . __FUNCTION__);
     return $results;
 }
-         
+
 
 function nde_edreports_datapull_publishers_func($limit=100) {
     error_log('Running ' . __FUNCTION__);
@@ -715,7 +719,7 @@ function edreports_tools_page() {
                 <th scope="row">Clear EdReports Data</th>
                 <td>
                     <input type="text" name="nukepassphrase" value="" placeholder="" /><small>Type in <em>NUKEEDREPORTS</em></small><br />
-                    <button class="button button-primary button-large" name="nukeEdReports" value="1">Dump all EdReport's Cached Data</button>                    
+                    <button class="button button-primary button-large" name="nukeEdReports" value="1">Dump all EdReport's Cached Data</button>
                 </td>
             </tr>
         </table>
@@ -737,7 +741,7 @@ function edreports_tools_page() {
                         <option value='100'>100</option>
                         <option value='200'>200</option>
                         <option value='300'>300</option>
-                    </select>                        
+                    </select>
                 </td>
             </tr>
             <tr valign="top">
@@ -763,8 +767,8 @@ function edreports_tools_page() {
                     <button class='button-large button button-primary' onclick="jQuery(this).removeClass('button-primary')" name='edreports_manual_update' value='reports' value='1'>Reports</button>
                     <button class='button-large button button-primary' onclick="jQuery(this).removeClass('button-primary')" name='edreports_manual_update' value='reportsdetails' value='1'>Report Details</button>
 
-                    
-                    
+
+
                 </td>
             </tr>
             <tr>
@@ -803,14 +807,14 @@ function edreports_plugin_settings_page() {
                     <td>
                         <select name="edrepsettings[authType]">
                             <option value="none">None</option>
-                            <option value="basic" <?= isset($er['authType']) && esc_attr($er['authType']) == 'basic' ? 'selected="SELECTED"' : ''; ?>>Basic</option>                            
+                            <option value="basic" <?= isset($er['authType']) && esc_attr($er['authType']) == 'basic' ? 'selected="SELECTED"' : ''; ?>>Basic</option>
                         </select>
                     </td>
-                </tr>         
+                </tr>
                 <tr valign="top">
                     <th scope="row">Basic Auth User</th>
                     <td><input type="text" name="edrepsettings[userName]" value="<?php echo isset($er['userName']) ? esc_attr($er['userName']) : ''; ?>" /></td>
-                </tr>        
+                </tr>
                 <tr valign="top">
                     <th scope="row">Basic Auth Password</th>
                     <td><input type="password" name="edrepsettings[password]" value="<?php echo isset($er['password']) ? esc_attr($er['password']) : ''; ?>" /></td>

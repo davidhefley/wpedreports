@@ -3,7 +3,7 @@ var filterTimeout = '';
 var $popup = '';
 
 /**
- * Deterine the type of animation event to return 
+ * Deterine the type of animation event to return
  * @type animations|nde_edreportsanimationEnd.animations
  */
 var animationEnd = (function (el) {
@@ -31,17 +31,17 @@ jQuery(document).ready(function ($) {
     $('#edreportFilterForm').on('submit',function(){
         jQuery('#filterMessage').slideUp('fast');
         if (filterTimeout) clearTimeout(filterTimeout);
-        refreshseries();        
+        refreshseries();
         return false;
     });
-    
+
     //grade selector click function
     $(document).on('click', '.edreport_filter .fakeCheckBox', function () {
-        
+
         if (jQuery('.edreport_filter .fakeCheckBox.active').length === 1 && jQuery(this).is('.active')) {
-            jQuery('#filterMessage').slideDown();            
+            jQuery('#filterMessage').slideDown();
         }
-        
+
         $(this).toggleClass('active');
         $checkbox = $(this).next();
         if ($(this).hasClass('active')) {
@@ -54,10 +54,10 @@ jQuery(document).ready(function ($) {
         filterTimeout = setTimeout(refreshseries, 750);
     });
 
-    //search on title text typing 
+    //search on title text typing
     $(document).on('keyup', '.edreport_filter #q', function (event) {
         if ( event.keyCode == 13 ) return true;
-        
+
         if (filterTimeout)
             clearTimeout(filterTimeout);
         filterTimeout = setTimeout(refreshseries, 750);
@@ -72,7 +72,7 @@ jQuery(document).ready(function ($) {
         $b.prop('disabled', true).css('opacity', '0.5');
         $b.css('width', 'auto');
         let w = $b.outerWidth( true );
-        $b.css('width', w);        
+        $b.css('width', w);
         $b.html('<div class="fa-1x"><span class="fas fa-spin fa-cog"></span></div>');
         var page = edrep.page * 1;
         var perpage = edrep.perpage * 1;
@@ -84,7 +84,7 @@ jQuery(document).ready(function ($) {
             $b.html('Load More Reviews...');
             $b.prop('disabled', false).css('opacity', '1');
             let aCount = jQuery('.edrep_review').length;
-            //we didn't get back an even amount, sooooo we should remove the more button            
+            //we didn't get back an even amount, sooooo we should remove the more button
             if (aCount - pCount != perpage)
                 $b.hide();
             $b.css('width', 'auto');
@@ -130,7 +130,7 @@ function refreshseries() {
         $b.html('Load More Reviews...');
         $b.prop('disabled', false).css('opacity', '1');
         let aCount = jQuery('.edrep_review').length;
-        //we didn't get back an even amount, sooooo we should remove the more button            
+        //we didn't get back an even amount, sooooo we should remove the more button
         if (aCount != perpage)
             $b.hide();
     });
@@ -260,11 +260,11 @@ function showDetails(a) {
         if (h > max)
             max = h;
     }).css('height', max);
-    
+
     jQuery(document).on('keyup', function(e){
         if ( e.keyCode == 27 ) hideDetails();
     });
-    
+
 }
 
 
@@ -311,7 +311,7 @@ function setScaleValues(gw, rating, score, target) {
     if (rating !== 'did-not-review') {
         let i = score - 1;
         if ( score == 0 ) i = 0;
-        
+
         $scale.eq( i ).append('<span class="result gw_' + gw + ' animated fadeInUp" style="opacity:0">' + score + '</span>');
         if ($scale.length == score) {
             $scale.removeClass('did-not-review-segment').addClass(rating + '-segment').find("img").hide();
