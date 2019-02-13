@@ -47,7 +47,7 @@ class EdReportAPI {
      * Basic function to write to the error log, and (optionally) screen if enabled
      * @param type $m
      */
-    public function debugLog($m) {
+    public function debugLog( string $m) {
         if ($this->debug !== FALSE) {
 
             if ($this->debug > 1) :
@@ -84,26 +84,36 @@ class EdReportAPI {
     }
 
     /**
-     * Retrieve publishers.  Medium?? volatility, cached for 1 hour
-     * @param int $age in minutes
+     *
+     * Retrieves the publishers data.  It will limit to a specific page, and number per return, and also allow for the
+     * filter_[updated|deleted] parameter to be set with a date ($since) formatted as YYYY-MM-DD to retrieve items
+     * updated after that date.
+     *
+     * @param int $page
+     * @param int $perpage
+     * @param string $since
+     * @param string $type
+     * @return object
      */
-    public function publishers($page = 1, $perpage = 5) {
+    public function publishers(int $page = 1, int $perpage = 5, string $since='', string $type=''):array {
         $this->debugLog('Getting Publishers');
         $parameters = [];
         if (!empty($page))
             $parameters['page'] = (int) $page;
         if (!empty($page))
             $parameters['per-page'] = (int) $perpage;
+        if ( !empty($since) && in_array($type, ['updated','deleted']) )
+            $parameters['filter_' . $type ] = $since;
         $data = $this->getDataList('publishers', $parameters);
         //$this->debugLog($data);
-        return $data;
+        return $data ?? [];
     }
 
     /**
      * Retrieve series.
      * @param int $age in minutes
      */
-    public function series($publisher = '', $subject = '', $page = 1, $perpage = 5) {
+    public function series($publisher = '', $subject = '', $page = 1, $perpage = 5, $since='', $type='') {
         $this->debugLog('Getting Series');
         $parameters = [];
         if (!empty($publisher))
@@ -114,6 +124,8 @@ class EdReportAPI {
             $parameters['page'] = (int) $page;
         if (!empty($page))
             $parameters['per-page'] = (int) $perpage;
+        if ( !empty($since) && in_array($type, ['updated','deleted']) )
+            $parameters['filter_' . $type ] = $since;
         $data = $this->getDataList('series', $parameters);
         //$this->debugLog($data);
         return $data;
@@ -134,7 +146,7 @@ class EdReportAPI {
      * Retrieve reports.
      * @param int $age in minutes
      */
-    public function reports($subject = '', $grade = '', $publisher = '', $page = 1, $perpage = 5) {
+    public function reports($subject = '', $grade = '', $publisher = '', $page = 1, $perpage = 5, $since='', $type='') {
         $this->debugLog('Getting Reports');
         $parameters = [];
         if (!empty($publisher))
@@ -147,6 +159,8 @@ class EdReportAPI {
             $parameters['page'] = (int) $page;
         if (!empty($page))
             $parameters['per-page'] = (int) $perpage;
+        if ( !empty($since) && in_array($type, ['updated','deleted']) )
+            $parameters['filter_' . $type ] = $since;
         $data = $this->getDataList('reports', $parameters);
         //$this->debugLog($data);
         return $data;
@@ -260,9 +274,7 @@ class EdReportAPI {
             $this->debugLog('Curl Return Code:' . $httpCode);
             return false;
         } else {
-            var_dump($return);
             $dataObject = json_decode($return);
-            var_dump($dataObject);
             if (!$dataObject) {
                 $this->debugLog('Unable to interpret data: ' . print_r($dataObject, TRUE));
                 return false;

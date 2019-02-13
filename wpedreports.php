@@ -50,7 +50,6 @@ function debugAPI() {
 //add_filter('the_content', 'debugAPI');
 
 /**
- * TODO: actual show real reports
  * @global NDE\WPHelper $wpHelper
  */
 function edreportnextpage_func() {
@@ -76,6 +75,13 @@ function edreportnextpage_func() {
 add_action('wp_ajax_edreportnextpage', 'edreportnextpage_func');
 add_action('wp_ajax_nopriv_edreportnextpage', 'edreportnextpage_func');
 
+/**
+ *
+
+ * @param array $atts
+ * @param string $content
+ * @return false|string
+ */
 function edrep_filter_bar($atts = [], $content = '') {
     $atts = shortcode_atts(array(
         'subject' => '27', //5->MATH, 27->ELA (but should get from db instead)
@@ -93,6 +99,7 @@ function edrep_filter_bar($atts = [], $content = '') {
                     <div class='col-xs-12 col-sm-7'>
                         <div role="group" aria-label="Show Reviews For Grade">
                             <?php
+                            /* @var int $subject Subject ID */
                             switch ($subject) {
                                 case '5':
                                     $limit = 9;
@@ -143,10 +150,15 @@ function edrep_filter_bar($atts = [], $content = '') {
 add_shortcode('edrep_filter_bar', 'edrep_filter_bar');
 
 function edrep_listing($atts, $content = '') {
+
     $atts = shortcode_atts(array(
         'subject' => '27', //5->MATH, 27->ELA (but should get from db instead)
         'perpage' => 10
             ), $atts, 'edrep_listing');
+    /**
+     * @var int $subject Subject ID
+     * @var int $perpage Number to show per page
+     */
     extract($atts);
     ob_start();
     global $wpHelper;
@@ -351,7 +363,7 @@ function format_edseries($d) {
                                                                 break;
                                                             case 'does-not-meet': echo '';
                                                                 break;
-                                                            default: echo $s;
+                                                            default: echo $status;
                                                         endswitch;
                                                         ?>'></span>
                                                     </span>
@@ -368,7 +380,7 @@ function format_edseries($d) {
                                                             break;
                                                         case 'does-not-meet': echo 'Does not meet expectations for alignment.';
                                                             break;
-                                                        default: echo $s;
+                                                        default: echo $status;
                                                     endswitch;
                                                     ?> <span class="iamalink">Learn more</span>
                                                 </div>
@@ -471,6 +483,8 @@ function wpedreports_init() {
         if (isset($_POST['edreports_manual_update'])) {
             $function = $_POST['edreports_manual_update'];
             $limit = !empty( (int)$_POST['limit']) ? (int) $_POST['limit'] : 5;
+            $forcereload = isset($_POST['forcereload']) && $_POST['forcereload']=='1';
+            $updateage = $_POST['updateage'] ?? 0;
             switch ($function) {
                 case 'grades': nde_edreports_datapull_grades_func();
                     $results='noupdates';
@@ -478,9 +492,9 @@ function wpedreports_init() {
                 case 'subjects': nde_edreports_datapull_subjects_func();
                     $results='noupdates';
                     break;
-                case 'publishers': nde_edreports_datapull_publishers_func($limit);
+                case 'publishers': nde_edreports_datapull_publishers_func($limit, $forcereload);
                     break;
-                case 'reports': nde_edreports_datapull_reports_func();
+                case 'reports': nde_edreports_datapull_reports_func($limit, $forcereload);
                     $results='noupdates';
                     break;
                 case 'reportsdetails': $results = nde_edreports_datapull_reports_details_func($limit);
@@ -491,7 +505,7 @@ function wpedreports_init() {
                 case 'typedetails': nde_edreports_datapull_reporttypes_details_func();
                     $results='noupdates';
                     break;
-                case 'series': nde_edreports_datapull_series_func($limit);
+                case 'series': nde_edreports_datapull_series_func($limit, $forcereload, $updateage);
                     $results='noupdates';
                     break;
                 case 'seriesdetails': $results = nde_edreports_datapull_series_details_func($limit);
@@ -538,19 +552,19 @@ register_activation_hook(__FILE__, 'nde_edreports_activation');
 
 function nde_edreports_activation() {
     if (!wp_next_scheduled('nde_edreports_datapull_series')) {
-        wp_schedule_event(time(), 'hourly', 'nde_edreports_datapull_series');
+        wp_schedule_event(time(), 'daily', 'nde_edreports_datapull_series');
     }
     if (!wp_next_scheduled('nde_edreports_datapull_series_details')) {
         wp_schedule_event(time(), 'tenminutes', 'nde_edreports_datapull_series_details');
     }
     if (!wp_next_scheduled('nde_edreports_datapull_reports')) {
-        wp_schedule_event(time(), 'hourly', 'nde_edreports_datapull_reports');
+        wp_schedule_event(time(), 'daily', 'nde_edreports_datapull_reports');
     }
     if (!wp_next_scheduled('nde_edreports_datapull_reports_details')) {
         wp_schedule_event(time(), 'tenminutes', 'nde_edreports_datapull_reports_details');
     }
     if (!wp_next_scheduled('nde_edreports_datapull_publisher')) {
-        wp_schedule_event(time(), 'hourly', 'nde_edreports_datapull_publisher');
+        wp_schedule_event(time(), 'daily', 'nde_edreports_datapull_publisher');
     }
     if (!wp_next_scheduled('nde_edreports_datapull_grades')) {
         wp_schedule_event(time(), 'daily', 'nde_edreports_datapull_grades');
@@ -564,6 +578,29 @@ function nde_edreports_activation() {
     if (!wp_next_scheduled('nde_edreports_datapull_reporttypes_details')) {
         wp_schedule_event(time(), 'daily', 'nde_edreports_datapull_reporttypes_details');
     }
+
+    add_action('admin_notices', 'nde_admin_notice__cronact');
+
+}
+
+function nde_edreports_resetcron() {
+    if (is_admin() && isset($_POST['manual_cron_reset']) ) {
+        nde_edreports_deactivation();
+        nde_edreports_activation();
+    }
+}
+
+if ( isset($_POST['manual_cron_reset'] ) ) add_action('init', 'nde_edreports_resetcron');
+
+function nde_admin_notice__crondeact() {
+    $class = 'notice notice-success';
+    $message = __( 'Cron Jobs Cleared.', 'sample-text-domain' );
+    printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
+}
+function nde_admin_notice__cronact() {
+    $class = 'notice notice-success';
+    $message = __( 'Cron Jobs Created.', 'sample-text-domain' );
+    printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
 }
 
 register_deactivation_hook(__FILE__, 'nde_edreports_deactivation');
@@ -578,6 +615,7 @@ function nde_edreports_deactivation() {
     wp_clear_scheduled_hook('nde_edreports_datapull_subjects');
     wp_clear_scheduled_hook('nde_edreports_datapull_reporttypes');
     wp_clear_scheduled_hook('nde_edreports_datapull_reporttypes_details');
+    add_action('admin_notices', 'nde_admin_notice__crondeact');
 }
 
 add_action('nde_edreports_datapull_series', 'nde_edreports_datapull_series_func');
@@ -590,12 +628,12 @@ add_action('nde_edreports_datapull_subjects', 'nde_edreports_datapull_subjects_f
 add_action('nde_edreports_datapull_reporttypes', 'nde_edreports_datapull_reporttypes_func');
 add_action('nde_edreports_datapull_reporttypes_details', 'nde_edreports_datapull_reporttypes_details_func');
 
-function nde_edreports_datapull_series_func($limit=100) {
+function nde_edreports_datapull_series_func($limit=100, $forcereload=false, $age=0) {
     error_log('Running ' . __FUNCTION__);
     if ( defined( 'DOING_CRON' ) ) $debug=1;
     else $debug=2;
     $wpHelper = new NDE\WPHelper( $debug );
-    $wpHelper->updateSeries($limit);
+    $wpHelper->updateSeries($limit, $forcereload, $age);
     error_log('Finished');
 }
 
@@ -612,12 +650,12 @@ function nde_edreports_datapull_series_details_func($limit = 5) {
     return $result;
 }
 
-function nde_edreports_datapull_reports_func() {
+function nde_edreports_datapull_reports_func( $limit=100, $forcereload=false) {
     error_log('Running ' . __FUNCTION__);
     if ( defined( 'DOING_CRON' ) ) $debug=1;
     else $debug=2;
     $wpHelper = new NDE\WPHelper($debug);
-    $wpHelper->updateReports();
+    $wpHelper->updateReports( $limit, $forcereload);
     error_log('Finished');
 }
 
@@ -632,12 +670,13 @@ function nde_edreports_datapull_reports_details_func($limit=15) {
 }
 
 
-function nde_edreports_datapull_publishers_func($limit=100) {
+function nde_edreports_datapull_publishers_func($limit=100, $forcereload = false) {
     error_log('Running ' . __FUNCTION__);
     if ( defined( 'DOING_CRON' ) ) $debug=1;
     else $debug=2;
+
     $wpHelper = new NDE\WPHelper($debug);
-    $wpHelper->updatePublishers($limit);
+    $wpHelper->updatePublishers($limit, $forcereload);
     error_log('Finished');
 }
 
@@ -745,6 +784,19 @@ function edreports_tools_page() {
                 </td>
             </tr>
             <tr valign="top">
+                <th scope="row">Force Full Reload?</th>
+                <td><select name='forcereload'>
+                        <option value=''>No</option>
+                        <option value='1'>Yes</option>
+                    </select></td>
+            </tr>
+            <tr valign="top">
+                <th scope="row">How many days ago to check for updates?</th>
+                <td>
+                    <input type='number' value='0' name="updateage" />
+                </td>
+            </tr>
+            <tr valign="top">
                 <th scope="row">Enable Continuous Looping?</th>
                 <td><select name='loop'>
                         <option value=''>No</option>
@@ -780,6 +832,20 @@ function edreports_tools_page() {
         </table>
 
     </form>
+    <form method="post">
+        <hr />
+        <table class="form-table">
+            <tr valign="top">
+                <th scope="row">Force Reset of Cron Timings</th>
+                <td>
+                    <button class="button button-primary button-large" name="manual_cron_reset" value="1">Reset</button>
+                </td>
+            </tr>
+        </table>
+    </form>
+
+
+
     <?php
 }
 

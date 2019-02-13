@@ -15,7 +15,9 @@ class WPHelper {
     private $forceRefresh = false;
     private $queryStart = 0;
     private $queryLimit = 10;
-    private $dbVer = "21";
+    private $dbVer = "23";
+    private $syncDates = '';
+    private $columnsFor=[];
     private $ages = [
         'subjects' => 1440,
         'report_types' => 1440,
@@ -518,34 +520,57 @@ class WPHelper {
      * @global \NDE\type $wpdb
      * @return boolean
      */
-    public function updateSeries($limit = 5) {
+    public function updateSeries(int $limit = 5, bool $all = false, int $timeframe = 0):bool {
         $this->debugLog(__FUNCTION__);
         $this->debugLog('Limit is ' . $limit);
-        $data = $this->edReports->series('', '', 1, $limit);
-        if (empty($data)) {
-            $this->debugLog('No data retrieved for series');
-            return false;
+        $this->debugLog('Forcing ALL is ' . ($all ? 'on' : 'off') );
+        $this->debugLog('Timeframe is ' . $timeframe );
+
+        $lastSync = $this->getLastSyncTime('series');
+
+        if ( $lastSync == '0000-00-00' ) {
+            $all = true; // we haven't done anything, so lets do this all!
         }
+
+
         global $wpdb;
         $table_name = $wpdb->prefix . 'EdRep_series';
 
-        $existing_columns = $wpdb->get_col("DESC {$table_name}", 0);
+        if ( $all ) {
+            $data = $this->edReports->series('', '', 1, $limit);
+            $r = $this->processAllData($table_name, $data);
+            if ( $r ) $this->updateSyncTime('series');
+        } else {
+            $this->debugLog("last sync was " . $lastSync);
+            //go back $timeframe days:
+            $syncDate = date('Y-m-d', strtotime('-' . $timeframe .' day', $lastSync) );
+            $this->debugLog("Syncing from {$syncDate}");
+            $updated = $this->edReports->series('','', 1, $limit, $syncDate, 'updated');
+            $deleted = $this->edReports->series('','', 1, $limit, $syncDate, 'deleted');
+            $r = $this->processUpdates($table_name, $updated, $deleted);
 
-        $this->debugLog("COLUMNS:" .  print_r($existing_columns, TRUE) );
+            $detail_table_name = $wpdb->prefix . 'EdRep_series_detail';
 
-        $wpdb->query('TRUNCATE TABLE `' . $table_name . '`');
-        foreach ($data as $series) {
-            //lets weed out any unknow fields!
-            $insertData = [];
-            foreach ($existing_columns as $datakey) {
-                if (isset($series->{$datakey})) {
-                    $insertData[$datakey] = $series->{$datakey};
-                }else {
-                    $this->debugLog("Missing {$datakey} column.");
+            // for deleted
+            if ( !empty($deleted) ) {
+                foreach ($deleted as $delete) {
+                    $where = ['id'=>$delete->id ];
+                    $wpdb->delete($detail_table_name, $where);
+                    $this->debugLog('Deleted ' . $delete->id .' from ' . $detail_table_name);
                 }
             }
-            $wpdb->insert($table_name, $insertData);
+
+            if ( !empty($updated) ) {
+                foreach ($updated as $update) {
+                    $this->debugLog('Updating ' . $update->id);
+                    $this->updateSeriesDetail(1, $update->id);
+                }
+            }
+
+            if ($r) $this->updateSyncTime('series');
         }
+        return true;
+
     }
 
     /**
@@ -565,8 +590,8 @@ class WPHelper {
         $series_table = $wpdb->prefix . 'EdRep_series';
 
 
-        $existing_columns = $wpdb->get_col("DESC {$details_table}", 0);
-        $this->debugLog($existing_columns);
+        //$existing_columns = $wpdb->get_col("DESC {$details_table}", 0);
+        //$this->debugLog($existing_columns);
         $this->edReports->disableDebug();
         if (!empty($id)) {
             $this->debugLog('Updating singular ' . $id);
@@ -574,19 +599,9 @@ class WPHelper {
             $pub_responses = serialize($detaildata->publisher_responses);
             $detaildata->publisher_responses = $pub_responses;
             $detaildata->last_updated = date('Y-m-d h:i:s');
-
-            /* ensure future changes of api won't break what we are doing now! */
-            $insertData = [];
-            foreach ($existing_columns as $datakey) {
-                if (isset($detaildata->{$datakey})) {
-                    $insertData[$datakey] = $detaildata->{$datakey};
-                }else {
-                    $this->debugLog("Missing {$datakey} column.");
-                }
-            }
-            //$this->debugLog($insertData);
-
-            $result = $wpdb->replace($details_table, $insertData);
+            $insertData = $this->sanitize_api_columns($details_table, [$detaildata] );
+            if ( !empty($insertData) ) $singular_insert_data = current($insertData);
+            $result = $wpdb->replace($details_table, $singular_insert_data);
             if ($result === FALSE)
                 $this->debugLog('SINGLE: Unable to update series details for ' . $id);
             else
@@ -595,7 +610,10 @@ class WPHelper {
         } else {
             //id was not forced, so use limit
             $this->debugLog('Attempting to update ' . $limit . ' series');
-            $qry = "SELECT id from {$details_table} WHERE TIMESTAMPDIFF(MINUTE,last_updated,'" . date('Y-m-d h:i:s') . "') <= " . $this->ages['seriesDetail']; //do no tneed updates
+            // this is the query for age based:
+            // $qry = "SELECT id from {$details_table} WHERE TIMESTAMPDIFF(MINUTE,last_updated,'" . date('Y-m-d h:i:s') . "') <= " . $this->ages['seriesDetail']; //do no tneed updates
+            // this is the query for MISSING based
+            $qry = "SELECT id from {$details_table}"; // this is for anything that is missing
             $reports_qry = "SELECT id FROM {$series_table} WHERE id NOT IN ({$qry}) LIMIT " . $limit;
             $this->debugLog($reports_qry);
             $detailRows = $wpdb->get_col($reports_qry);
@@ -607,16 +625,9 @@ class WPHelper {
                     $detaildata->last_updated = date('Y-m-d h:i:s');
 
                     /* ensure future changes of api won't break what we are doing now! */
-                    $insertData = [];
-                    foreach ($existing_columns as $datakey) {
-                        if (isset($detaildata->{$datakey})) {
-                            $insertData[$datakey] = $detaildata->{$datakey};
-                        }else {
-                            $this->debugLog("Missing {$datakey} column.");
-                        }
-                    }
-                    //$this->debugLog($insertData);
-                    $result = $wpdb->replace($details_table, $insertData);
+                    $insertData = $this->sanitize_api_columns($details_table, [$detaildata]);
+                    if ( !empty($insertData) ) $singular_insert_data = current($insertData);
+                    $result = $wpdb->replace($details_table, $singular_insert_data);
                     if ($result === FALSE)
                         $this->debugLog('GROUP: Unable to update series details for ' . $id);
                     else
@@ -651,16 +662,18 @@ class WPHelper {
             return $serData;
         } else {
             $reports_table = $wpdb->prefix . 'EdRep_reports';
-            //$qry = "SELECT id from {$details_table} WHERE TIMESTAMPDIFF(MINUTE,last_updated,NOW()) <= " . $this->ages['reports']; //do no tneed updates
-            $qry = "SELECT id from {$details_table} WHERE TIMESTAMPDIFF(MINUTE,last_updated,'" . date('Y-m-d h:i:s') . "') <= " . $this->ages['reportsDetail']; //do no tneed updates
-            $this->debugLog($qry);
+
+            //this was for age based
+            //$qry = "SELECT id from {$details_table} WHERE TIMESTAMPDIFF(MINUTE,last_updated,'" . date('Y-m-d h:i:s') . "') <= " . $this->ages['reportsDetail']; //do no tneed updates
+
+            $qry = "SELECT id from {$details_table}"; // this is for *anything* that is missing
             $reports_qry = "SELECT id FROM {$reports_table} WHERE id NOT IN ({$qry}) LIMIT " . $limit;
+            $this->debugLog($reports_qry);
             $detailRows = $wpdb->get_col($reports_qry);
             $this->debugLog("These are the report details we are updating: " . print_r($detailRows, true) );
             if (!empty($detailRows)) {
                 foreach ($detailRows as $rid) {
                     $detaildata = $this->edReports->reportsDetail($rid);
-                    $this->debugLog($detaildata);
                     if (empty($detaildata))
                         continue;
                     if (empty($detaildata->series_id))
@@ -723,36 +736,40 @@ class WPHelper {
 
     /**
      * Retrieve publishers list and insert into db
+     * @param integer $limit
+     * @param bool $all Controls whether to do a FULL retrieval, or to only do it for the last $timeframe days
+     * @param int $timeframe Controls the number of days back when doing a partial update
      * @global \NDE\type $wpdb
      * @return boolean
      */
-    public function updatePublishers($limit = 5) {
+    public function updatePublishers( int $limit = 5, bool $all = false, int $timeframe = 0):bool {
         $this->debugLog(__FUNCTION__);
         $this->debugLog('Per Page set to ' . $limit);
-        $data = $this->edReports->publishers(1, $limit);
-        if (empty($data)) {
-            $this->debugLog('No data retrieved');
-            return false;
-        }
+        $this->debugLog('Forcing ALL is ' . ($all ? 'on' : 'off') );
 
+        $lastSync = $this->getLastSyncTime('publishers');
+
+        if ( $lastSync == '0000-00-00' ) {
+            $all = true; // we haven't done anything, so lets do this all!
+        }
 
         global $wpdb;
         $table_name = $wpdb->prefix . 'EdRep_publishers';
 
-        $existing_columns = $wpdb->get_col("DESC {$table_name}", 0);
+        if ( $all ) {
+            $data = $this->edReports->publishers(1, $limit);
+            $r = $this->processAllData($table_name, $data);
+            if ( $r ) $this->updateSyncTime('publishers');
+        }  else {
+            $this->debugLog("last sync was " . $lastSync);
 
-        $wpdb->query('TRUNCATE TABLE `' . $table_name . '`');
-        foreach ($data as $publisher) {
-            $insertData = [];
-            foreach ($existing_columns as $datakey) {
-                if (isset($publisher->{$datakey})) {
-                    $insertData[$datakey] = $publisher->{$datakey};
-                }else {
-                    $this->debugLog("Missing {$datakey} column.");
-                }
-            }
-            $wpdb->insert($table_name, $insertData);
-
+            //go back $timeframe days:
+            $syncDate = date('Y-m-d', strtotime('-' . $timeframe .' day', $lastSync) );
+            $this->debugLog("Syncing from {$syncDate}");
+            $updated = $this->edReports->publishers(1, $limit, $syncDate, 'updated');
+            $deleted = $this->edReports->publishers(1, $limit, $syncDate, 'deleted');
+            $r = $this->processUpdates($table_name, $updated, $deleted);
+            if ( $r ) $this->updateSyncTime('publishers');
         }
         return true;
     }
@@ -762,37 +779,59 @@ class WPHelper {
      * @global \NDE\type $wpdb
      * @return boolean
      */
-    public function updateReports($perpage = 100) {
+    public function updateReports(int $limit = 100, bool $all = false, int $timeframe = 0) {
         $this->debugLog(__FUNCTION__);
-        $this->debugLog('Per Page set to ' . $perpage);
-        //$subject = '', $grade = '', $publisher = '', $page = 1, $perpage = 5
-        $data = $this->edReports->reports('', '', '', 1, $perpage);
-        if (empty($data)) {
-            $this->debugLog('No Data Retrieved');
-            return false;
+        $this->debugLog('Per Page set to ' . $limit);
+        $this->debugLog('Forcing ALL is ' . ($all ? 'on' : 'off') );
+
+        $lastSync = $this->getLastSyncTime('reports');
+
+        if ( $lastSync == '0000-00-00' ) {
+            $all = true; // we haven't done anything, so lets do this all!
         }
+
         global $wpdb;
-
-
         $table_name = $wpdb->prefix . 'EdRep_reports';
-        $existing_columns = $wpdb->get_col("DESC {$table_name}", 0);
-
-        $wpdb->query('TRUNCATE TABLE `' . $table_name . '`');
-        foreach ($data as $report) {
 
 
-            $insertData = [];
-            foreach ($existing_columns as $datakey) {
-                if (empty($report->series_id)) $report->series_id = 0;
-                if (isset($report->{$datakey})) {
-                    $insertData[$datakey] = $report->{$datakey};
-                } else {
-                    $this->debugLog("Missing {$datakey} column.");
+        if ( $all ) {
+            $data = $this->edReports->reports('', '', '', 1, $limit);
+            $r = $this->processAllData($table_name, $data);
+            if ( $r ) $this->updateSyncTime('reports');
+        }  else {
+            $this->debugLog("last sync was " . $lastSync);
+
+            //go back $timeframe days:
+            $syncDate = date('Y-m-d', strtotime('-' . $timeframe .' day', $lastSync) );
+            $this->debugLog("Syncing from {$syncDate}");
+            $updated = $this->edReports->reports('','','',1, $limit, $syncDate, 'updated');
+            $deleted = $this->edReports->reports('','','',1, $limit, $syncDate, 'deleted');
+            $r = $this->processUpdates($table_name, $updated, $deleted);
+
+
+
+            $detail_table_name = $wpdb->prefix . 'EdRep_report_detail';
+
+            // for deleted
+            if ( !empty($deleted) ) {
+                foreach ($deleted as $delete) {
+                    $where = ['id'=>$delete->id ];
+                    $wpdb->delete($detail_table_name, $where);
+                    $this->debugLog('Deleted ' . $delete->id .' from ' . $detail_table_name);
                 }
             }
 
-            $wpdb->insert($table_name, $insertData);
+            if ( !empty($updated) ) {
+                foreach ($updated as $update) {
+                    $this->debugLog('Updating ' . $update->id);
+                    $this->updateReportDetails(1, $update->id);
+                }
+            }
+
+            if ( $r ) $this->updateSyncTime('reports');
         }
+        return true;
+
     }
 
     /**
@@ -886,5 +925,147 @@ class WPHelper {
         }
         return $return;
     }
+
+
+    private function loadSyncDates() {
+        if ( $this->syncDates === '' ) {
+            $syncdates = get_option('edrepsyncdates');
+            if ( empty($syncdates) ) $this->syncDates=[]; //change it to an array so we know it is loaded
+            else $this->syncDates = $syncdates;
+        }
+
+
+    }
+
+    private function getLastSyncTime(string $name) {
+            $this->loadSyncDates();
+            if ( isset($this->syncDates[$name]) ) return $this->syncDates[$name];
+            else return '0000-00-00';
+    }
+
+    /**
+     * Sets the last synced time for future updates
+     * @param string $name
+     * @return bool
+     */
+    private function updateSyncTime(string $name): bool {
+        $this->loadSyncDates();
+        $this->syncDates[$name] = time();
+        update_option('edrepsyncdates', $this->syncDates, false);
+        return true;
+
+    }
+
+    /**
+     * Makes sure that we only insert existing fields into db. Sometimes the API will change(add) fields to the return and we shouldn't just blindly insert them.
+     *
+     * @param string $table
+     * @param object $data
+     * @return array
+     */
+    private function sanitize_api_columns(string $table_name, $data ): array {
+        global $wpdb;
+
+        if ( !isset($this->columnsFor[$table_name]) ) {
+            $retrieved_columns = $wpdb->get_col("DESC {$table_name}", 0);
+            $this->columnsFor[$table_name] = $retrieved_columns;
+            $this->debugLog("COLUMNS RETRIEVED FOR {$table_name}:" .  implode(',', $retrieved_columns ).'.' );
+            unset($retrieved_columns);
+        }
+
+        $existing_columns = $this->columnsFor[$table_name];
+
+        $insertData = [];
+        foreach ($data as $item) {
+            // lets weed out any unknown fields!
+            $insertItem = [];
+            foreach ($existing_columns as $datakey) {
+                if (
+                    ( gettype($item) == 'object' && property_exists ($item,$datakey) ) ||
+                    ( gettype($item) == 'array' && data_key_exists ($item,$datakey) )
+
+                ) { // using property_exists since teh column may exist but be null
+                    $insertItem[$datakey] = $item->{$datakey};
+                }else {
+                    $this->debugLog("Missing |{$datakey}| column.");
+                }
+            }
+            if ( !empty($insertItem) ) $insertData[] = $insertItem;
+        }
+
+        return $insertData;
+    }
+
+    /**
+     *
+     * Process udpated and deleted items
+     * @param string $table_name
+     * @param $updated
+     * @param $deleted
+     * @return bool
+     */
+    private function processUpdates( string $table_name, $updated, $deleted):bool {
+        global $wpdb;
+
+        if ( !empty($updated) ) {
+            $sanitizedUpdated = $this->sanitize_api_columns($table_name, $updated);
+        }
+
+        if ( !empty($deleted) ) {
+            $sanitizedDeleted = $this->sanitize_api_columns($table_name, $deleted);
+        }
+
+        unset($updated, $deleted); //we no longer need this
+
+        if ( empty($sanitizedUpdated) ) {
+            $this->debugLog('Nothing to update for ' . $table_name);
+        } else {
+
+            foreach ($sanitizedUpdated as $updateData) {
+                $this->debugLog('Updating ' . $updateData['title']);
+                $result = $wpdb->replace($table_name, $updateData); // update each data item
+                if ( $result ) $this->debugLog("Updated {$result} items.");
+                else $this->debugLog('Failed to update item');
+            }
+        }
+
+        if ( empty($sanitizedDeleted) ) {
+            $this->debugLog('Nothing to delete for ' . $table_name);
+        } else {
+            foreach ($sanitizedDeleted as $deleteData) {
+                $where = ['id'=> $deleteData['id'] ];
+                $result = $wpdb->delete($table_name, $where); // delete each data item
+                if ( $result ) $this->debugLog("Deleted {$result} items.");
+                else $this->debugLog('Failed to delete item');
+            }
+        }
+        return true;
+    }
+
+    private function processAllData( string $table_name, $data):bool {
+        global $wpdb;
+        if (empty($data)) {
+            $this->debugLog('No data retrieved for ' . $table_name);
+            return false;
+        }
+
+        $sanitizedData = $this->sanitize_api_columns($table_name, $data);
+        unset($data); //we no longer need this
+        if ( empty($sanitizedData) ) {
+            $this->debugLog('No Data to insert into ' . $table_name);
+            return false;
+        }
+
+        $this->debugLog('Attempting to update ' . count($sanitizedData) .' row');
+
+        $wpdb->query('TRUNCATE TABLE `' . $table_name . '`'); // since we are doing a full sync, lets make sure the table is clear
+        foreach ($sanitizedData as $insertData) {
+            $result = $wpdb->insert($table_name, $insertData); // insert each data item
+            if ( $result ) $this->debugLog("Inserted {$result} items.");
+            else $this->debugLog('Failed to insert item');
+        }
+        return true;
+    }
+
 
 }
