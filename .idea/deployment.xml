@@ -1,15 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="On explicit save action" serverName="NIMC - STAGING" createEmptyFolders="true" autoUploadExternalChanges="true">
+  <component name="PublishConfigData" autoUpload="On explicit save action" serverName="COMDEV" createEmptyFolders="true" autoUploadExternalChanges="true">
     <serverData>
       <paths name="COMDEV">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/html/wpdev/wp-content/plugins/wpedreports" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="COMPROD">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
-      <paths name="COMPROD">
+      <paths name="INSIDENDE - VR">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
@@ -27,6 +34,13 @@
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="NIMC - PRODUCTION">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/wp-content/plugins/wpedreports" local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>

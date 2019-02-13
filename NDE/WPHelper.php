@@ -15,7 +15,7 @@ class WPHelper {
     private $forceRefresh = false;
     private $queryStart = 0;
     private $queryLimit = 10;
-    private $dbVer = "19";
+    private $dbVer = "21";
     private $ages = [
         'subjects' => 1440,
         'report_types' => 1440,
@@ -106,7 +106,11 @@ class WPHelper {
 
         /** PUBLISHERS * */
         $table_name = $wpdb->prefix . 'EdRep_publishers';
-        $queries[] = "CREATE TABLE `" . $table_name . "` (`id` int(11) NOT NULL, `publisher` varchar(150) NOT NULL, PRIMARY KEY  (id) );";
+        $queries[] = "CREATE TABLE `" . $table_name . "` (
+            `id` int(11) NOT NULL, 
+            `publisher` varchar(150) NOT NULL,
+            `date_updated` datetime NOT NULL, 
+            PRIMARY KEY  (id) );";
 
         /** SERIES * */
         $table_name = $wpdb->prefix . 'EdRep_series';
@@ -118,7 +122,7 @@ class WPHelper {
             `subject_taxonomy_id` int(11) NOT NULL, 
             `edition` varchar(40) NOT NULL, 
             PRIMARY KEY  (id) );";
-        
+
 
         /** SERIES->DETAIL * */
         $table_name = $wpdb->prefix . 'EdRep_series_detail';
@@ -285,7 +289,7 @@ class WPHelper {
         global $wpdb;
         $reports_table = $wpdb->prefix . 'EdRep_reports';
         //$func = function($value) { return '"'.$value.'"';};
-        //$sql_grades = array_map($func,$grades);        
+        //$sql_grades = array_map($func,$grades);
         $qry = "SELECT DISTINCT series_id FROM {$reports_table} WHERE `grade_taxonomy_id` IN (" . implode(',', $grade_ids) . ");";
         $results = $wpdb->get_col($qry);
         return $results;
@@ -346,7 +350,7 @@ class WPHelper {
           $data = $this->reportDetails($id);
           }
           return maybe_unserialize($data->data);
-         * 
+         *
          */
         return $data;
     }
@@ -363,7 +367,7 @@ class WPHelper {
                 $this->debugLog('Details for series ' . $id . ' not in DB, pulling from API');
                 $data = $this->updateSeriesDetail('', $id);
             }
-        } else { //id not set, sow e need to do a general query  
+        } else { //id not set, sow e need to do a general query
             $this->debugLog('Getting group of details');
             $subject_table = $wpdb->prefix . 'EdRep_subjects';
             $publisher_table = $wpdb->prefix . 'EdRep_publishers';
@@ -526,9 +530,9 @@ class WPHelper {
         $table_name = $wpdb->prefix . 'EdRep_series';
 
         $existing_columns = $wpdb->get_col("DESC {$table_name}", 0);
-        
+
         $this->debugLog("COLUMNS:" .  print_r($existing_columns, TRUE) );
-        
+
         $wpdb->query('TRUNCATE TABLE `' . $table_name . '`');
         foreach ($data as $series) {
             //lets weed out any unknow fields!
@@ -536,6 +540,8 @@ class WPHelper {
             foreach ($existing_columns as $datakey) {
                 if (isset($series->{$datakey})) {
                     $insertData[$datakey] = $series->{$datakey};
+                }else {
+                    $this->debugLog("Missing {$datakey} column.");
                 }
             }
             $wpdb->insert($table_name, $insertData);
@@ -574,6 +580,8 @@ class WPHelper {
             foreach ($existing_columns as $datakey) {
                 if (isset($detaildata->{$datakey})) {
                     $insertData[$datakey] = $detaildata->{$datakey};
+                }else {
+                    $this->debugLog("Missing {$datakey} column.");
                 }
             }
             //$this->debugLog($insertData);
@@ -587,7 +595,7 @@ class WPHelper {
         } else {
             //id was not forced, so use limit
             $this->debugLog('Attempting to update ' . $limit . ' series');
-            $qry = "SELECT id from {$details_table} WHERE TIMESTAMPDIFF(MINUTE,last_updated,'" . date('Y-m-d h:i:s') . "') <= " . $this->ages['seriesDetail']; //do no tneed updates                        
+            $qry = "SELECT id from {$details_table} WHERE TIMESTAMPDIFF(MINUTE,last_updated,'" . date('Y-m-d h:i:s') . "') <= " . $this->ages['seriesDetail']; //do no tneed updates
             $reports_qry = "SELECT id FROM {$series_table} WHERE id NOT IN ({$qry}) LIMIT " . $limit;
             $this->debugLog($reports_qry);
             $detailRows = $wpdb->get_col($reports_qry);
@@ -603,6 +611,8 @@ class WPHelper {
                     foreach ($existing_columns as $datakey) {
                         if (isset($detaildata->{$datakey})) {
                             $insertData[$datakey] = $detaildata->{$datakey};
+                        }else {
+                            $this->debugLog("Missing {$datakey} column.");
                         }
                     }
                     //$this->debugLog($insertData);
@@ -641,12 +651,12 @@ class WPHelper {
             return $serData;
         } else {
             $reports_table = $wpdb->prefix . 'EdRep_reports';
-            //$qry = "SELECT id from {$details_table} WHERE TIMESTAMPDIFF(MINUTE,last_updated,NOW()) <= " . $this->ages['reports']; //do no tneed updates                        
-            $qry = "SELECT id from {$details_table} WHERE TIMESTAMPDIFF(MINUTE,last_updated,'" . date('Y-m-d h:i:s') . "') <= " . $this->ages['reportsDetail']; //do no tneed updates            
+            //$qry = "SELECT id from {$details_table} WHERE TIMESTAMPDIFF(MINUTE,last_updated,NOW()) <= " . $this->ages['reports']; //do no tneed updates
+            $qry = "SELECT id from {$details_table} WHERE TIMESTAMPDIFF(MINUTE,last_updated,'" . date('Y-m-d h:i:s') . "') <= " . $this->ages['reportsDetail']; //do no tneed updates
             $this->debugLog($qry);
             $reports_qry = "SELECT id FROM {$reports_table} WHERE id NOT IN ({$qry}) LIMIT " . $limit;
             $detailRows = $wpdb->get_col($reports_qry);
-            $this->debugLog("These are the report details we are updating: " . print_r($detailRows, true) );            
+            $this->debugLog("These are the report details we are updating: " . print_r($detailRows, true) );
             if (!empty($detailRows)) {
                 foreach ($detailRows as $rid) {
                     $detaildata = $this->edReports->reportsDetail($rid);
@@ -724,11 +734,25 @@ class WPHelper {
             $this->debugLog('No data retrieved');
             return false;
         }
+
+
         global $wpdb;
         $table_name = $wpdb->prefix . 'EdRep_publishers';
+
+        $existing_columns = $wpdb->get_col("DESC {$table_name}", 0);
+
         $wpdb->query('TRUNCATE TABLE `' . $table_name . '`');
         foreach ($data as $publisher) {
-            $wpdb->insert($table_name, (array) $publisher);
+            $insertData = [];
+            foreach ($existing_columns as $datakey) {
+                if (isset($publisher->{$datakey})) {
+                    $insertData[$datakey] = $publisher->{$datakey};
+                }else {
+                    $this->debugLog("Missing {$datakey} column.");
+                }
+            }
+            $wpdb->insert($table_name, $insertData);
+
         }
         return true;
     }
@@ -748,12 +772,26 @@ class WPHelper {
             return false;
         }
         global $wpdb;
+
+
         $table_name = $wpdb->prefix . 'EdRep_reports';
+        $existing_columns = $wpdb->get_col("DESC {$table_name}", 0);
+
         $wpdb->query('TRUNCATE TABLE `' . $table_name . '`');
         foreach ($data as $report) {
-            if (empty($report->series_id))
-                $report->series_id = 0;
-            $wpdb->insert($table_name, (array) $report);
+
+
+            $insertData = [];
+            foreach ($existing_columns as $datakey) {
+                if (empty($report->series_id)) $report->series_id = 0;
+                if (isset($report->{$datakey})) {
+                    $insertData[$datakey] = $report->{$datakey};
+                } else {
+                    $this->debugLog("Missing {$datakey} column.");
+                }
+            }
+
+            $wpdb->insert($table_name, $insertData);
         }
     }
 
