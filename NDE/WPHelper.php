@@ -306,8 +306,29 @@ class WPHelper {
             return '"' . $value . '"';
         };
         $sql_grades = array_map($func, $grades);
+
+        if ( count($grades) > 1 ) {
+            $minGrade = min($grades);
+            $maxGrade = max($grades);
+            $sql_grades[] = '"' . $minGrade.'-'.$maxGrade . '"';
+        }
+
         $qry = "SELECT id FROM {$grades_table} WHERE name IN (" . implode(',', $sql_grades) . ");";
         $results = $wpdb->get_col($qry);
+
+
+        $dashqry = "SELECT id,code FROM {$grades_table} WHERE `code` LIKE \"%-%\";";
+
+        $dashCollections = $wpdb->get_results($dashqry);
+
+        foreach ( $dashCollections as $dash ) {
+            $gradeBand = explode('-', $dash->code);
+            if ( count($gradeBand) != 2 ) continue; // something went wrong
+            foreach ( $grades as $grade ) {
+                if ( $grade >=$gradeBand[0] && $grade <=$gradeBand[1]) $results[] = $dash->id;
+            }
+        }
+
         return $results;
     }
 

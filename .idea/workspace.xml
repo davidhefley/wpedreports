@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4b617952-2137-4817-93ba-234645ef9799" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/deployment.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/NDE/WPHelper.php" beforeDir="false" afterPath="$PROJECT_DIR$/NDE/WPHelper.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wpedreports.php" beforeDir="false" afterPath="$PROJECT_DIR$/wpedreports.php" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -17,20 +17,32 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/NDE/WPHelper.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="148">
-              <caret line="743" column="21" selection-start-line="743" selection-start-column="21" selection-end-line="743" selection-end-column="21" />
+            <state relative-caret-position="288">
+              <caret line="316" column="40" lean-forward="true" selection-start-line="316" selection-start-column="40" selection-end-line="316" selection-end-column="40" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/wpedreports.php">
-          <provider selected="true" editor-type-id="text-editor" />
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="390">
+              <caret line="59" column="8" selection-start-line="59" selection-start-column="8" selection-end-line="59" selection-end-column="8" />
+              <folding>
+                <element signature="n#debugAPI#0;n#!!top" />
+                <element signature="n#nde_edreports_datapull_series_details_func#0;n#!!top" />
+              </folding>
+            </state>
+          </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/NDE/EdReportAPI.php">
-          <provider selected="true" editor-type-id="text-editor" />
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="5610">
+              <caret line="334" selection-start-line="334" selection-end-line="334" />
+            </state>
+          </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
@@ -53,22 +65,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>localize</find>
-      <find>reportIntervals</find>
-      <find>EdRep_report_types_details</find>
-      <find>Using the url of</find>
-      <find>using the datadetails</find>
-      <find>showDetails</find>
-      <find>|</find>
-      <find>edrep_title</find>
-      <find>updatePublishers</find>
-      <find>publisher</find>
-      <find>$existing_columns = $wpdb-&gt;get_col(&quot;DESC {$table_name}&quot;, 0);</find>
-      <find>date</find>
-      <find>fields</find>
-      <find>updatePub</find>
-      <find>_reports</find>
-      <find>$datakey</find>
+      <find>deleted</find>
+      <find>betterDie</find>
+      <find>processUpdates</find>
+      <find>series_detail</find>
+      <find>seriesDetail</find>
+      <find>series</find>
+      <find>force full</find>
+      <find>forcereload</find>
+      <find>n updateSeries</find>
+      <find>nde_edreports_datapull_series_func</find>
+      <find>updateage</find>
+      <find>die()</find>
+      <find>sanitize_api_columns</find>
+      <find>`code`</find>
+      <find>die(</find>
+      <find>updateSeriesDetail</find>
+      <find>nde_edreports_datapull_reports_details</find>
+      <find>nde_edreports_datapull_reports_details_func</find>
+      <find>types_grades</find>
+      <find>types_details</find>
+      <find>cron</find>
+      <find>edrep_listing</find>
+      <find>n debug</find>
+      <find>$s</find>
+      <find>no materials</find>
+      <find>slidesToShow</find>
+      <find>&lt;div class='reports'  data-slick=</find>
+      <find>edreportnextpage</find>
+      <find>continuie</find>
+      <find>n series</find>
     </findStrings>
     <dirStrings>
       <dir>C:\Users\david.hefley\PhpstormProjects\WPEdReports</dir>
@@ -77,11 +103,15 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="mock:///Dummy.txt" root0="SKIP_INSPECTION" />
+    <setting file="mock:///Dummy.txt" root0="SKIP_INSPECTION" />
+  </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/NDE/EdReportAPI.php" />
         <option value="$PROJECT_DIR$/assets/js/nde_edreports.js" />
+        <option value="$PROJECT_DIR$/NDE/EdReportAPI.php" />
         <option value="$PROJECT_DIR$/wpedreports.php" />
         <option value="$PROJECT_DIR$/NDE/WPHelper.php" />
       </list>
@@ -93,9 +123,9 @@
     </include_path>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="54" />
+    <option name="x" value="1912" />
     <option name="y" value="-8" />
-    <option name="width" value="1874" />
+    <option name="width" value="1936" />
     <option name="height" value="1216" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -104,29 +134,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="ProjectPane">
-        <subPane>
-          <expand>
-            <path>
-              <item name="WPEdReports" type="b2602c69:ProjectViewProjectNode" />
-              <item name="WPEdReports" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="WPEdReports" type="b2602c69:ProjectViewProjectNode" />
-              <item name="WPEdReports" type="462c0819:PsiDirectoryNode" />
-              <item name="assets" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="WPEdReports" type="b2602c69:ProjectViewProjectNode" />
-              <item name="WPEdReports" type="462c0819:PsiDirectoryNode" />
-              <item name="assets" type="462c0819:PsiDirectoryNode" />
-              <item name="js" type="462c0819:PsiDirectoryNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
       <pane id="Scope" />
+      <pane id="ProjectPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -163,7 +172,9 @@
       <workItem from="1548771396112" duration="1322000" />
       <workItem from="1548777960182" duration="90000" />
       <workItem from="1548785956604" duration="2576000" />
-      <workItem from="1550010440936" duration="1687000" />
+      <workItem from="1550010440936" duration="22051000" />
+      <workItem from="1550154802875" duration="14000" />
+      <workItem from="1551366406873" duration="4934000" />
     </task>
     <task id="LOCAL-00001" summary="Initial">
       <created>1548771736794</created>
@@ -179,17 +190,31 @@
       <option name="project" value="LOCAL" />
       <updated>1548791036451</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Added column filter for api returns so inserts don't bomb.">
+      <created>1550065519070</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1550065519070</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Update to reflect API V2.2 from EdReports">
+      <created>1550092462487</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1550092462487</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="5675000" />
+    <option name="totallyTimeSpent" value="30987000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="54" y="-8" width="1874" height="1216" extended-state="6" />
+    <frame x="1912" y="-8" width="1936" height="1216" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25799337" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.14552239" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -204,7 +229,9 @@
       <window_info anchor="bottom" id="Version Control" order="9" />
       <window_info anchor="bottom" id="Terminal" order="10" />
       <window_info anchor="bottom" id="Event Log" order="11" side_tool="true" />
-      <window_info anchor="bottom" id="File Transfer" order="12" visible="true" weight="0.32963988" />
+      <window_info anchor="bottom" id="File Transfer" order="12" visible="true" weight="0.083102494" />
+      <window_info active="true" anchor="bottom" id="Command Line Tools Console" order="13" weight="0.32963988" />
+      <window_info anchor="bottom" id="Messages" order="14" weight="0.21052632" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -218,12 +245,21 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Initial" />
     <MESSAGE value="Add Science, but not real changes here." />
-    <option name="LAST_COMMIT_MESSAGE" value="Add Science, but not real changes here." />
+    <MESSAGE value="Added column filter for api returns so inserts don't bomb." />
+    <MESSAGE value="Update to reflect API V2.2 from EdReports" />
+    <option name="LAST_COMMIT_MESSAGE" value="Update to reflect API V2.2 from EdReports" />
   </component>
   <component name="WordPressConfiguration" enabled="true">
     <wordpressPath>C:\Users\david.hefley\wordpress-5.0.3</wordpressPath>
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/NDE/EdReportAPI.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="5610">
+          <caret line="334" selection-start-line="334" selection-end-line="334" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/assets/js/nde_edreports.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="102">
@@ -232,15 +268,20 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/wpedreports.php">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/NDE/EdReportAPI.php">
-      <provider selected="true" editor-type-id="text-editor" />
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="390">
+          <caret line="59" column="8" selection-start-line="59" selection-start-column="8" selection-end-line="59" selection-end-column="8" />
+          <folding>
+            <element signature="n#debugAPI#0;n#!!top" />
+            <element signature="n#nde_edreports_datapull_series_details_func#0;n#!!top" />
+          </folding>
+        </state>
+      </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/NDE/WPHelper.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="148">
-          <caret line="743" column="21" selection-start-line="743" selection-start-column="21" selection-end-line="743" selection-end-column="21" />
+        <state relative-caret-position="288">
+          <caret line="316" column="40" lean-forward="true" selection-start-line="316" selection-start-column="40" selection-end-line="316" selection-end-column="40" />
         </state>
       </provider>
     </entry>

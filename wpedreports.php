@@ -67,7 +67,7 @@ function edreportnextpage_func() {
             format_edseries($s);
         endforeach;
     else:
-        if ( $page == 1 ) echo "<div class='noseriesfound'>No Materials Found</div>";
+        if ( $page == 1 ) echo "<div class='noseriesfound'>No More Materials Found</div>";
     endif;
     die();
 }
@@ -180,7 +180,7 @@ function edrep_listing($atts, $content = '') {
             <button type='button' class='ndebutton loadmorereports'>Load More Reviews...</button>
         </div>
         <?php
-    else: echo "<div class='noseriesfound'>No Materials Found</div>";
+    else: echo "<div class='noseriesfound'>No More Materials Found</div>";
     endif;
 
     add_action('wp_footer', 'inject_edreport_modal');
@@ -308,6 +308,7 @@ function format_edseries($d) {
                 ?>
 
                 <div class='col-xs-12 col-sm-7 col-md-9'>
+
                     <div class='reports'  data-slick='{"slidesToShow": <?= $sts; ?>, "slidesToScroll":<?= $sts; ?>}'>
                         <?php
                         //$status = ['does-not-meet', 'meets', 'partially-meets'];
@@ -316,7 +317,10 @@ function format_edseries($d) {
                                 $data = unserialize(base64_decode($report->data));
 
 
-                                if ( empty($data) ) return;
+                                if ( empty($data) ) {
+                                    echo "CONTINUING";
+                                    continue;
+                                }
                                 if ($data->gateway_1_rating == 'meets' && $data->gateway_2_rating == 'meets' && $data->gateway_3_rating == 'meets') {
                                     $status = 'meets';
                                 } else {
@@ -427,6 +431,7 @@ function format_edseries($d) {
                                 </div>
                             <?php endforeach; ?>
                     </div>
+
                 </div>
             </div>
 
