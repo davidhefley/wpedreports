@@ -788,7 +788,11 @@ class WPHelper {
             $syncDate = date('Y-m-d', strtotime('-' . $timeframe .' day', $lastSync) );
             $this->debugLog("Syncing from {$syncDate}");
             $updated = $this->edReports->publishers(1, $limit, $syncDate, 'updated');
+            $this->debugLog('UPDATED');
+            $this->debugLog($updated);
             $deleted = $this->edReports->publishers(1, $limit, $syncDate, 'deleted');
+            $this->debugLog('DELETED');
+            $this->debugLog($deleted);
             $r = $this->processUpdates($table_name, $updated, $deleted);
             if ( $r ) $this->updateSyncTime('publishers');
         }

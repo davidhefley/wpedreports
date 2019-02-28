@@ -318,7 +318,9 @@ function format_edseries($d) {
 
 
                                 if ( empty($data) ) {
-                                    echo "CONTINUING";
+                                    /*print_r($report);*/
+                                    //echo "<div style='display:none'>" . print_r($report->data) ."</div>";
+                                    echo "CONTINUING 123";
                                     continue;
                                 }
                                 if ($data->gateway_1_rating == 'meets' && $data->gateway_2_rating == 'meets' && $data->gateway_3_rating == 'meets') {
