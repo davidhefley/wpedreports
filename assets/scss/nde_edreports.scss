@@ -3,10 +3,12 @@ To change this license header, choose License Headers in Project Properties.
 To change this template file, choose Tools | Templates
 and open the template in the editor.
 */
-/* 
+/*
     Created on : Jun 20, 2018, 12:32:50 PM
     Author     : david.hefley
 */
+
+$edrepgreen: #1ba79b;
 
 .edrep_review {
     background: #fff;
@@ -21,7 +23,7 @@ and open the template in the editor.
 
 
             font-size: 20px;
-            color: #1ba79b;
+            color: $edrepgreen;
             font-weight: 700;
             line-height: 1.1;
         }
@@ -46,11 +48,11 @@ and open the template in the editor.
         }
 
         .iamalink {
-            color: #1ba79b;
+            color: $edrepgreen;
         }
     }
     .edrep_footer {
-        padding: 7px 20px 8px;        
+        padding: 7px 20px 8px;
         position:relative;
     }
 }
@@ -94,7 +96,7 @@ and open the template in the editor.
                         background: #e53542;
                     }
                     &.meets {
-                        background: #1ba79b;
+                        background: $edrepgreen;
 
                     }
                     &.partially-meets {
@@ -110,13 +112,13 @@ and open the template in the editor.
             font-size: 12px;
             text-align: left;
             color: #fff;
-            background-color: #1ba79b;
+            background-color: $edrepgreen;
             padding: 5px 10px;
             position: relative;
             border-radius: 5px 5px 0 0;
             a {
                 box-shadow:none;
-                color: #1ba79b;
+                color: $edrepgreen;
                 text-align: left;
                 display: block;
             }
@@ -133,11 +135,11 @@ and open the template in the editor.
                     padding:5px 30px 5px 10px;
                 }
                 &:after {
-                    font-family: "Font Awesome 5 Free"; 
-                    content: "\f080";  
-                    font-weight: 900;                                         
+                    font-family: "Font Awesome 5 Free";
+                    content: "\f080";
+                    font-weight: 900;
                     position: absolute;
-                    right: 10px;                    
+                    right: 10px;
                     top:6px;
                     pointer-events: none;
                 }
@@ -150,11 +152,11 @@ and open the template in the editor.
 
             }
             :after {
-                font-family: "Font Awesome 5 Free"; 
-                font-weight: 900; 
-                content: "\f35d";                
+                font-family: "Font Awesome 5 Free";
+                font-weight: 900;
+                content: "\f35d";
                 position: absolute;
-                right: 10px;                                
+                right: 10px;
                 pointer-events: none;
             }
         }
@@ -182,7 +184,7 @@ and open the template in the editor.
     }
 }
 
-.edreport_filter {    
+.edreport_filter {
 
     background-color:white;
     box-shadow: 0 4px 8px 0 rgba(0,0,0,.12), 0 0 2px 0 rgba(0,0,0,.12);
@@ -190,9 +192,9 @@ and open the template in the editor.
         background-color: #f3fafa;
         padding: 10px;
         margin-top:5px;
-        h3 {            
+        h3 {
             font-size: 20px;
-            color: #1ba79b;
+            color: $edrepgreen;
             font-weight: 700;
             line-height: 1.1;
             margin:0;
@@ -203,7 +205,7 @@ and open the template in the editor.
         padding:10px;
     }
     label {
-        /*border: 1px solid #1ba79b;*/
+        /*border: 1px solid $edrepgreen;*/
         padding: 5px;
         margin-right: 5px;
         border-radius: 10px;
@@ -212,22 +214,22 @@ and open the template in the editor.
         width:auto;
         white-space: nowrap;
         .fakeCheckBox,.gradeToggle {
-            position:relative;            
+            position:relative;
             z-index:2;
             background-color:white;
             cursor:pointer;
             padding:0;
-            border:1px solid #1ba79b;
+            border:1px solid $edrepgreen;
             border-radius:32px;
-            color:#1ba79b;
+            color:$edrepgreen;
             display:inline-block;
             width:32px;
             height:32px;
             line-height:32px;
             text-align:center;
             &.active {
-                border:1px solid #1ba79b;
-                background-color:#1ba79b;
+                border:1px solid $edrepgreen;
+                background-color:$edrepgreen;
                 color:white;
             }
         }
@@ -236,8 +238,8 @@ and open the template in the editor.
             padding:0 3px;
             border-radius:10px;
             &:hover {
-                border:1px solid #1ba79b;
-                background-color:#1ba79b;
+                border:1px solid $edrepgreen;
+                background-color:$edrepgreen;
                 color:white;
             }
         }
@@ -247,23 +249,66 @@ and open the template in the editor.
             z-index:1;
         }
     }
-
     input[type=text] {
-        border:1px solid #1ba79b;        
+        border:1px solid $edrepgreen;
         border-radius:20px;
         padding-left:10px;
         width:90%;
     }
+
+    .filterbystatus {
+        margin-top: 10px;
+        > div {
+            width: 28%;
+            text-align:center;
+            display:inline-block;
+            cursor: pointer;
+            padding: 2px;
+            &.active {
+                border: 2px solid $edrepgreen;
+            }
+
+            .circle {
+                vertical-align: top;
+                border-radius: 50%;
+                width: 45px;
+                height: 45px;
+                display: inline-block;
+                text-align: center;
+
+                > span {
+                    color: #fff;
+                    font-size: 25px;
+                    line-height: 45px;
+                    /*padding-left:1px;*/
+                }
+
+                &.does-not-meet {
+                    background: #e53542;
+                }
+
+                &.meets {
+                    background: $edrepgreen;
+
+                }
+
+                &.partially-meets {
+                    background: #fcb808;
+                }
+            }
+        }
+    }
+
 }
 
 .loadmorereports {
-    border:1px solid #1ba79b;        
+    border:1px solid $edrepgreen;
     border-radius:20px;
-    padding-left:10px;        
+    padding-left:10px;
     background-color:white;
     padding:10px;
     &:hover {
-        background-color:#1ba79b;
+        background-color:$edrepgreen;
         color:white;
     }
 }
@@ -286,7 +331,7 @@ and open the template in the editor.
 }
 
 
-.popup-container {    
+.popup-container {
     box-sizing: border-box;
     * {
         box-sizing: border-box;
@@ -294,19 +339,19 @@ and open the template in the editor.
     z-index:1001;
     position: fixed;
     top: 200px;
-    @media screen and (max-width: 730px) { 
+    @media screen and (max-width: 730px) {
         top:80px;
-    
+
     }
     left: 0;
     width: 100%;
     margin: 0 auto;
-    padding: 0 50px;    
+    padding: 0 50px;
     text-align: center;
     display: none;
     .popup {
         max-width: 900px;
-        background-color: #1ba79b;
+        background-color: $edrepgreen;
         margin: 0 auto;
         border-radius: 15px;
         .close {
@@ -362,14 +407,14 @@ and open the template in the editor.
                             width:100%;
                             margin:0 auto;
                         }
-                        
-                        @media screen and (max-width: 730px) { 
+
+                        @media screen and (max-width: 730px) {
                             .scales > a {
                                 width:100%!important;
                                 display:block;
                                 margin-top:20px;
                             }
-                        
+
                         }
 
                         margin-right: 18px;
@@ -397,10 +442,10 @@ and open the template in the editor.
                         }
                     }
                     &.meets {
-                        border: 1px solid #1ba79b!important;
+                        border: 1px solid $edrepgreen!important;
                         color: #9b9b9b;
                         .status {
-                            background: #1ba79b;
+                            background: $edrepgreen;
                             color: #fff;
                             font-weight: 600;
                         }
@@ -426,7 +471,7 @@ and open the template in the editor.
                     .status {
                         text-align:center;
                         font-size:14px;
-                        margin: 50px -10px 0;                        
+                        margin: 50px -10px 0;
                         padding: 5px 10px;
                         border-bottom: 1px solid #cecece;
                         background-color: #efefef;
@@ -444,23 +489,23 @@ and open the template in the editor.
             display: table;
             width: 100%;
             a{
-                color: #1ba79b;
+                color: $edrepgreen;
                 text-decoration: none;
                 &.gw-1 {
                     ul {
-                        animation-delay: 250ms;  
+                        animation-delay: 250ms;
                     }
                 }
                 &.gw-2 {
                     ul {
-                        animation-delay: 500ms;  
+                        animation-delay: 500ms;
                     }
                 }
                 &.gw-3 {
                     ul {
-                        animation-delay: 750ms;  
+                        animation-delay: 750ms;
                     }
-                }                
+                }
                 &.half{
                     display: table-cell;
                     width: 50%;
@@ -488,7 +533,7 @@ and open the template in the editor.
                     position:relative;
                     z-index:100;
                     margin-bottom: 0;
-                    padding-bottom: 3px;                    
+                    padding-bottom: 3px;
                     ul {
                         li {
                             height:32px;
@@ -501,7 +546,7 @@ and open the template in the editor.
                 }
                 ul {
                     display: table-row;
-                    li {                        
+                    li {
                         display: table-cell;
                         height: 3px;
                         position: relative;
@@ -553,7 +598,7 @@ and open the template in the editor.
                                 }
                                 &.gw_3{
                                     animation-delay: 1000ms;
-                                }                                
+                                }
 
                                 background: #004462;
                                 width: 20px;
@@ -643,7 +688,7 @@ and open the template in the editor.
                                     bottom: -25px;
                                     right: -8px;
                                     z-index: 100;
-                                    font-family: Source Sans Pro,Helvetica Neue,Helvetica,Roboto,Arial,sans-serif;                                    
+                                    font-family: Source Sans Pro,Helvetica Neue,Helvetica,Roboto,Arial,sans-serif;
                                 }
                             }
 
@@ -663,7 +708,7 @@ and open the template in the editor.
             &:after {
                 font-family: "Font Awesome 5 Free";
                 font-weight: 900;
-                content: "\f35d";                
+                content: "\f35d";
                 pointer-events: none;
             }
         }

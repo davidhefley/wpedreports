@@ -36,6 +36,20 @@ jQuery(document).ready(function ($) {
     });
 
     //grade selector click function
+
+    $(document).on('click', '.edreport_filter .filterbystatus > div', function () {
+            /*let isActive = $(this).hasClass('active');
+            if ( $('.edreport_filter .filterbystatus > div.active').length == 1 && isActive ) {
+                alert('At least one status must be selected.');
+                return false;
+            }*/
+            $(this).toggleClass('active');
+            if (filterTimeout)
+                clearTimeout(filterTimeout);
+            filterTimeout = setTimeout(refreshseries, 750);
+
+    })
+
     $(document).on('click', '.edreport_filter .fakeCheckBox', function () {
 
         if (jQuery('.edreport_filter .fakeCheckBox.active').length === 1 && jQuery(this).is('.active')) {
@@ -118,7 +132,7 @@ jQuery(document).ready(function ($) {
 //clear reports, and load fresh when a new filter is configured
 function refreshseries() {
     jQuery('#edReportHolder').html('');
-    var $b = jQuery('.loadmorereports');
+    let $b = jQuery('.loadmorereports');
     $b.show();
     $b.html('Load More Reviews...');
     let w = $b.outerWidth();
@@ -138,14 +152,21 @@ function refreshseries() {
 
 //load the series results
 function loadSeries(page, perpage, subject, callback) {
-    var grades = [];
+    let grades = [];
+    let status = [];
     jQuery('.filterbody .fakeCheckBox.active').each(function (i, e) {
         grades.push(jQuery(this).data('val'));
     });
+
+    jQuery('.filterbody .filterbystatus > div.active').each(function (i, e) {
+        status.push(jQuery(this).data('status'));
+    });
+
     jQuery.ajax({
         url: edrep.ajaxurl,
         data: {
             grades: grades,
+            status: status,
             textsearch: jQuery('#q').val(),
             action: 'edreportnextpage',
             page: page,

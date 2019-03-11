@@ -15,7 +15,7 @@ class WPHelper {
     private $forceRefresh = false;
     private $queryStart = 0;
     private $queryLimit = 10;
-    private $dbVer = "23";
+    private $dbVer = "24";
     private $syncDates = '';
     private $columnsFor=[];
     private $ages = [
@@ -28,6 +28,8 @@ class WPHelper {
         'reports' => 240,
         'reportsDetail' => 1440,
     ];
+
+
 
     public function __construct($debug = '') {
 
@@ -65,7 +67,7 @@ class WPHelper {
         }
     }
 
-    public function seriesReports($series_id) {
+    public function seriesReports($series_id, $status=[]) {
         global $wpdb;
         $reports_table = $wpdb->prefix . 'EdRep_reports';
         $grades_table = $wpdb->prefix . 'EdRep_grades';
@@ -74,6 +76,31 @@ class WPHelper {
         $qry .= " LEFT JOIN {$grades_table} b on a.grade_taxonomy_id = b.id";
         $qry .= " LEFT JOIN {$details_table} c on a.id = c.id";
         $qry .= " WHERE a.series_id=%d";
+
+        if ( !empty($status) && count($status)!= 3 ) {
+            $statusFilter = [];
+            foreach ($status as $statii) {
+                switch ($statii) {
+                    case 'meets':
+                        //if we made it to gateway_3 and it still has a meets criteria
+                        $statusFilter[] = '`gateway_3`="meets"';
+                        break;
+                    case 'partially-meets':
+                        //any gateway is a partially-meets, but there are also no "does not meets"
+                        $statusFilter[] = '( (`gateway_1`="partially-meets" OR `gateway_2`="partially-meets" OR `gateway_3`="partially-meets") AND (`gateway_1`<>"does-not-meet" AND `gateway_2`<>"does-not-meet" AND `gateway_3`<>"does-not-meet") )';
+                        break;
+                    case 'does-not-meet':
+                        //if any of htem are "does-not-meet"
+                        $statusFilter[] = '(`gateway_1`="does-not-meet" OR `gateway_2`="does-not-meet" OR `gateway_3`="does-not-meet")';
+                        break;
+
+                }
+            }
+            $qry .=" AND (" . implode('OR', $statusFilter).")";
+        }
+
+
+
         $qry .= " ORDER BY cast(grade as unsigned)";
 
         $params = [$series_id];
@@ -191,6 +218,9 @@ class WPHelper {
                     `id` varchar(20) NOT NULL,
                     `series_id` int(11) NOT NULL,
                     `data` mediumtext NOT NULL,
+                    `gateway_1` varchar(50) NULL,
+                    `gateway_2` varchar(50) NULL,
+                    `gateway_3` varchar(50) NULL,
                     `last_updated` TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
                     PRIMARY KEY  (id)
                     );";
@@ -233,12 +263,41 @@ class WPHelper {
         return $data;
     }
 
-    public function series($subject = '', $grades = [], $text = '', $state = 'none') {
+    private function getSeriesFromStatus($status=[]) {
+        global $wpdb;
+        $reportdetails_table = $wpdb->prefix . 'EdRep_report_details';
+        $statusFilter = [];
+        foreach ( $status as $statii ) {
+            switch($statii) {
+                case 'meets':
+                    //if we made it to gateway_3 and it still has a meets criteria
+                    $statusFilter[] = '`gateway_3`="meets"';
+                    break;
+                case 'partially-meets':
+                    //any gateway is a partially-meets, but there are also no "does not meets"
+                    $statusFilter[] = '( (`gateway_1`="partially-meets" OR `gateway_2`="partially-meets" OR `gateway_3`="partially-meets") AND (`gateway_1`<>"does-not-meet" AND `gateway_2`<>"does-not-meet" AND `gateway_3`<>"does-not-meet") )';
+                    break;
+                case 'does-not-meet':
+                    //if any of htem are "does-not-meet"
+                    $statusFilter[] = '(`gateway_1`="does-not-meet" OR `gateway_2`="does-not-meet" OR `gateway_3`="does-not-meet")';
+                    break;
+
+            }
+        }
+        $qry= "SELECT DISTINCT series_id FROM {$reportdetails_table} WHERE ".implode(" OR ", $statusFilter);
+        $data = $wpdb->get_col($qry);
+        return $data;
+
+    }
+
+    public function series($subject = '', $grades = [], $text = '', $state = 'none', $status = [] ) {
         global $wpdb;
         $series_table = $wpdb->prefix . 'EdRep_series';
         $seriesdetails_table = $wpdb->prefix . 'EdRep_series_detail';
         $subject_table = $wpdb->prefix . 'EdRep_subjects';
         $publisher_table = $wpdb->prefix . 'EdRep_publishers';
+
+        $this->populateGatewayInfo();
 
         $qry = "SELECT a.id, title, grades_description, b.name as subject, c.publisher, edition FROM {$seriesdetails_table} a";
         /* $qry .= " LEFT JOIN {$seriesdetails_table} d ON d.id = a.id"; */
@@ -255,6 +314,15 @@ class WPHelper {
         if (!empty($text)) {
             $qry .= ' AND `title` LIKE %s';
             $parameter_values[] = '%' . $text . '%';
+        }
+
+        if ( !empty($status) && count($status)!=3 ) { //if there are 3 items, we don't need this filter either!
+            $status_ids = $this->getSeriesFromStatus($status);
+            if ( !empty($status_ids) ) {
+                $qry .= " AND a.id IN (" . implode(',', $status_ids) . ")";
+            } else {
+                return [];
+            }
         }
 
 
@@ -280,6 +348,8 @@ class WPHelper {
 
         $qry .= " ORDER BY a.title";
         $qry .= " LIMIT {$this->queryStart},{$this->queryLimit}";
+        $this->debugLog($qry);
+        do_action( 'qm/error', $qry );
         $qry = $wpdb->prepare($qry, $parameter_values);
         $data = $wpdb->get_results($qry);
         return $data;
@@ -384,7 +454,8 @@ class WPHelper {
 
         if (!empty($id)) {
             //$this->debugLog('Getting single details');
-            $qry = $wpdb->prepare("SELECT * FROM {$details_table} WHERE id = %d AND is_state_specific = %s", $id, $state);
+            $query = "SELECT * FROM {$details_table} WHERE id = %d AND is_state_specific = %s";
+            $qry = $wpdb->prepare($query, $id, $state);
             $data = $wpdb->get_row($qry);
             if (empty($data)) {
                 $this->debugLog('Details for series ' . $id . ' not in DB, pulling from API');
@@ -1090,6 +1161,53 @@ class WPHelper {
             else $this->debugLog('Failed to insert item');
         }
         return true;
+    }
+
+    /**
+     * Sets the gateway information after parsing the encoded data
+     * @param $id
+     * @param $gw1
+     * @param $gw2
+     * @param $gw3
+     */
+    private function setReportGatewayDetails($id, $gw1, $gw2, $gw3) {
+        global $wpdb;
+        $details_table = $wpdb->prefix . 'EdRep_report_details';
+        $data = [
+            'gateway_1'=>filter_var($gw1,FILTER_SANITIZE_STRING),
+            'gateway_2'=>filter_var($gw2,FILTER_SANITIZE_STRING),
+            'gateway_3'=>filter_var($gw3,FILTER_SANITIZE_STRING)
+        ];
+
+        $where = [
+            'id'=> (int) $id
+        ];
+
+        $wpdb->update($details_table, $data, $where );
+
+
+    }
+
+    /**
+     * Temporary function to read the data from the table, unserialize it, and then populate the newly created gateway columns for filtering
+     *@since DBVer 24
+     */
+    public function populateGatewayInfo() {
+        global $wpdb;
+        $details_table = $wpdb->prefix . 'EdRep_report_details';
+        $qry = "SELECT * FROM {$details_table} WHERE `gateway_1` IS NULL";
+        $detailsCollection = $wpdb->get_results($qry);
+        foreach ( $detailsCollection as $detail ) {
+             $decodedData = base64_decode( $detail->data);
+             if ( !$decodedData ) {
+                 echo "INVALID DATA FOUND FOR {$detail->id}";
+                 die();
+             }
+
+             $reportData = unserialize($decodedData);
+             $this->setReportGatewayDetails($detail->id,  $reportData->gateway_1_rating,  $reportData->gateway_2_rating,  $reportData->gateway_3_rating);
+        }
+
     }
 
 

@@ -1,9 +1,9 @@
 <?php
 /**
-  Plugin Name: WP EdReports
-  Description: EdReports API Integration
-  Version: 0.0.1
-  Author: David Hefley, Nebraska Department of Education
+ * Plugin Name: WP EdReports
+ * Description: EdReports API Integration
+ * Version: 0.0.1
+ * Author: David Hefley, Nebraska Department of Education
  */
 define('NDE_EDREPORTS_VERSION', '0.1.9');
 define('NDE_EDREPORTS_PATH', plugin_dir_path(__FILE__));
@@ -21,7 +21,8 @@ $wpHelper = new NDE\WPHelper();
 //$wpHelper->getAllData();
 //$edReports->cacheRefresh( isset($_GET['apiforce']) );
 
-function debugAPI() {
+function debugAPI()
+{
     global $wpHelper;
     ob_start();
     $wpHelper->cacheRefresh(true);
@@ -52,22 +53,24 @@ function debugAPI() {
 /**
  * @global NDE\WPHelper $wpHelper
  */
-function edreportnextpage_func() {
-    $subject = isset($_GET['subject']) ? (int) $_GET['subject'] : '';
-    $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
-    $perpage = isset($_GET['perpage']) ? (int) $_GET['perpage'] : 10;
+function edreportnextpage_func()
+{
+    $subject = isset($_GET['subject']) ? (int)$_GET['subject'] : '';
+    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+    $perpage = isset($_GET['perpage']) ? (int)$_GET['perpage'] : 10;
     $text = isset($_GET['textsearch']) ? sanitize_text_field($_GET['textsearch']) : '';
     $grades = isset($_GET['grades']) ? $_GET['grades'] : [];
+    $status = isset($_GET['status']) ? $_GET['status'] : [];
     global $wpHelper;
     $wpHelper->queryStart(($perpage * $page));
     $wpHelper->queryLimit($perpage);
-    $series = $wpHelper->series($subject, $grades, $text);
+    $series = $wpHelper->series($subject, $grades, $text, 'none', $status);
     if (!empty($series)) :
         foreach ($series as $s) :
-            format_edseries($s);
+            format_edseries($s, $status);
         endforeach;
     else:
-        if ( $page == 1 ) echo "<div class='noseriesfound'>No More Materials Found</div>";
+        if ($page == 1) echo "<div class='noseriesfound'>No More Materials Found</div>";
     endif;
     die();
 }
@@ -77,15 +80,15 @@ add_action('wp_ajax_nopriv_edreportnextpage', 'edreportnextpage_func');
 
 /**
  *
-
  * @param array $atts
  * @param string $content
  * @return false|string
  */
-function edrep_filter_bar($atts = [], $content = '') {
+function edrep_filter_bar($atts = [], $content = '')
+{
     $atts = shortcode_atts(array(
         'subject' => '27', //5->MATH, 27->ELA (but should get from db instead)
-            ), $atts, 'edrep_listing');
+    ), $atts, 'edrep_listing');
     extract($atts);
     ob_start();
     ?>
@@ -105,22 +108,24 @@ function edrep_filter_bar($atts = [], $content = '') {
                                     $limit = 9;
                                     $include_hs = true;
                                     break;
-                                default: $limit = 13;
+                                default:
+                                    $limit = 13;
                                     $include_hs = false;
                             }
                             for ($i = 0; $i < $limit; $i++) :
                                 ?>
                                 <label>
-                                    <div class='fakeCheckBox' data-val='<?= $i; ?>' ><?= ($i == '0') ? 'K' : $i; ?></div>
+                                    <div class='fakeCheckBox' data-val='<?= $i; ?>'><?= ($i == '0') ? 'K' : $i; ?></div>
                                     <!-- input type='checkbox' name='grades[]' value='<?= $i; ?>' checked='CHECKED' / -->
                                 </label>
-                                <?php
+                            <?php
                             endfor;
 
                             if ($include_hs) :
                                 ?>
                                 <label>
-                                    <div class='fakeCheckBox' title='High School' data-val='hs' alt='High School'>HS</div>
+                                    <div class='fakeCheckBox' title='High School' data-val='hs' alt='High School'>HS
+                                    </div>
                                     <!-- input type='checkbox' name='grades[]' value='hs' checked='CHECKED' / -->
                                 </label>
                             <?php endif ?>
@@ -131,10 +136,32 @@ function edrep_filter_bar($atts = [], $content = '') {
                     </div>
                     <div class='col-xs-12 col-sm-5 text-right'>
                         <div class='search-filter'>
-                            <input type="text" class="button" value="" id="q" name='textsearch' placeholder="Search Titles">
+                            <input type="text" class="button" value="" id="q" name='textsearch'
+                                   placeholder="Search Titles">
                         </div>
+
+                        <div class="filterbystatus">
+                            <div class="" data-status="meets" title="Show only reports with a MEETS status">
+                                <div class="circle meets">
+                                    <span class="fas fa-check"></span>
+                                </div>
+                            </div>
+                            <div  class="" data-status="partially-meets"  title="Show only reports with a PARTIALLY MEETS status">
+                                <div class="circle partially-meets">
+                                    <span class="fas fa-exclamation-triangle"></span>
+                                </div>
+                            </div>
+                            <div class="" data-status="does-not-meet" title="Show only reports with a DOES NOT MEET status">
+                                <div class="circle does-not-meet">
+                                    <span class="fas fas-check"></span>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
+
+
                 <div class='row'>
                     <div class='col-xs-12 col-sm-12 text-danger text-center' id='filterMessage' style='display:none;'>
                         All grade levels will be shown.
@@ -149,12 +176,12 @@ function edrep_filter_bar($atts = [], $content = '') {
 
 add_shortcode('edrep_filter_bar', 'edrep_filter_bar');
 
-function edrep_listing($atts, $content = '') {
-
+function edrep_listing($atts, $content = '')
+{
     $atts = shortcode_atts(array(
         'subject' => '27', //5->MATH, 27->ELA (but should get from db instead)
         'perpage' => 10
-            ), $atts, 'edrep_listing');
+    ), $atts, 'edrep_listing');
     /**
      * @var int $subject Subject ID
      * @var int $perpage Number to show per page
@@ -167,7 +194,7 @@ function edrep_listing($atts, $content = '') {
 
     $report_intervals = $wpHelper->reportIntervals();
     $imagePath = NDE_EDREPORTS_URI . '/assets/images/';
-    wp_localize_script('nde_edreports', 'edrep', ['ajaxurl' => admin_url('admin-ajax.php'), 'subject' => (int) $subject, 'perpage' => (int) $perpage, 'page' => 1, 'intervals' => $report_intervals, 'images' => $imagePath]);
+    wp_localize_script('nde_edreports', 'edrep', ['ajaxurl' => admin_url('admin-ajax.php'), 'subject' => (int)$subject, 'perpage' => (int)$perpage, 'page' => 1, 'intervals' => $report_intervals, 'images' => $imagePath]);
     if (!empty($series)) :
         ?>
         <div id="edReportHolder" style="opacity:0"><?php
@@ -179,7 +206,7 @@ function edrep_listing($atts, $content = '') {
         <div class='loadMore text-center'>
             <button type='button' class='ndebutton loadmorereports'>Load More Reviews...</button>
         </div>
-        <?php
+    <?php
     else: echo "<div class='noseriesfound'>No More Materials Found</div>";
     endif;
 
@@ -190,7 +217,8 @@ function edrep_listing($atts, $content = '') {
 
 add_shortcode('edrep_listing', 'edrep_listing');
 
-function inject_edreport_modal() {
+function inject_edreport_modal()
+{
     ?>
     <div class="popup-container" style="" id="edreportdetails">
         <div class="popup">
@@ -253,7 +281,8 @@ function inject_edreport_modal() {
 
                                     <div>
                                         <span></span>
-                                        <a href="#" class="ndetooltip" onclick="return false;" title="This material was not reviewed for Gateway Three because it did not meet expectations for Gateways One and Two">
+                                        <a href="#" class="ndetooltip" onclick="return false;"
+                                           title="This material was not reviewed for Gateway Three because it did not meet expectations for Gateways One and Two">
                                             <span class='fas fa-info-circle'></span>
                                         </a>
                                     </div>
@@ -271,10 +300,11 @@ function inject_edreport_modal() {
     <?php
 }
 
-function format_edseries($d) {
+function format_edseries($d, $statusFilter=[])
+{
 
     global $wpHelper;
-    $full = $wpHelper->seriesDetails($d->id);
+    $full = $wpHelper->seriesDetails($d->id,'','none');
     ?>
     <div class='edrep_review' id='edrep_<?= $d->id; ?>'>
         <div class='edrep_title'>
@@ -294,12 +324,13 @@ function format_edseries($d) {
                             <img src="<?= NDE_EDREPORTS_URI; ?>/assets/images/logo-edreports.jpg" alt=""/>
                         </div>
                         <div>
-                            Go to <a href="<?= $full->series_url; ?>" target="_blank">EdReports.org</a> for detailed information about alignment and usability
+                            Go to <a href="<?= $full->series_url; ?>" target="_blank">EdReports.org</a> for detailed
+                            information about alignment and usability
                         </div>
                     </div>
                 </div>
                 <?php
-                $seriesReports = $wpHelper->seriesReports($d->id);
+                $seriesReports = $wpHelper->seriesReports($d->id,$statusFilter);
                 $sts = count($seriesReports);
                 if ($sts === 0 || $sts === 1)
                     $sts = 1;
@@ -309,18 +340,25 @@ function format_edseries($d) {
 
                 <div class='col-xs-12 col-sm-7 col-md-9'>
 
-                    <div class='reports'  data-slick='{"slidesToShow": <?= $sts; ?>, "slidesToScroll":<?= $sts; ?>}'>
+                    <div class='reports' data-slick='{"slidesToShow": <?= $sts; ?>, "slidesToScroll":<?= $sts; ?>}'>
                         <?php
                         //$status = ['does-not-meet', 'meets', 'partially-meets'];
                         if (!empty($seriesReports))
                             foreach ($seriesReports as $report) :
-                                $data = unserialize(base64_decode($report->data));
+                                $decoded = base64_decode($report->data);
+                                if ( empty($decoded) ) {
+                                    echo "ERROR: " . $report->id;
+                                    continue;
+
+                                }
+
+                                $data = unserialize( $decoded );
 
 
-                                if ( empty($data) ) {
+                                if (empty($data)) {
                                     /*print_r($report);*/
                                     //echo "<div style='display:none'>" . print_r($report->data) ."</div>";
-                                    echo "CONTINUING 123";
+                                    echo "INVALID REPORT DATA - CONTINUING";
                                     continue;
                                 }
                                 if ($data->gateway_1_rating == 'meets' && $data->gateway_2_rating == 'meets' && $data->gateway_3_rating == 'meets') {
@@ -336,15 +374,18 @@ function format_edseries($d) {
                                 //$data->gateway_2_rating;
                                 //$data->gateway_3_rating;
                                 ?>
-                                <div class="report <?= $status; ?>" id='report_<?= $report->id; ?>' data-id='<?= $report->id; ?>' >
-                                    <?php /*
-                                    <div style='display:none'>
-                                        <?php print_r($data); ?>
-                                    </div>
-                                     *
-                                     */?>
+                                <div class="report <?= $status; ?>" id='report_<?= $report->id; ?>'
+                                     data-id='<?= $report->id; ?>'>
+
+                                    <!--<div style='display:none'>
+                                        <?php /*print_r($data); */?>
+                                    </div>-->
+
+
                                     <p class="report-detail">
-                                        <a href="<?= str_replace(['//api.', '//st.'],'//',$data->report_url); ?>" tabindex="0" target="_blank" class="ga-processed" title='View Full Report on EdReports.org'><?= $report->description; ?></a>
+                                        <a href="<?= str_replace(['//api.', '//st.'], '//', $data->report_url); ?>"
+                                           tabindex="0" target="_blank" class="ga-processed"
+                                           title='View Full Report on EdReports.org'><?= $report->description; ?></a>
                                     </p>
                                     <div class="report-descr">
 
@@ -359,34 +400,44 @@ function format_edseries($d) {
                                             </a>
                                         <?php else: ?>
 
-                                            <a href="<?= $data->report_url; ?>" tabindex="0" target="_blank" class="ga-processed">
+                                            <a href="<?= $data->report_url; ?>" tabindex="0" target="_blank"
+                                               class="ga-processed">
                                                 <div>
                                                     <span class="circle <?= $status; ?>"><span class='fas fa-<?php
                                                         switch ($status) :
-                                                            case 'meets': echo 'check';
+                                                            case 'meets':
+                                                                echo 'check';
                                                                 break;
-                                                            case 'partially-meets': echo 'exclamation-triangle';
+                                                            case 'partially-meets':
+                                                                echo 'exclamation-triangle';
                                                                 break;
-                                                            case 'does-not-meet': echo '';
+                                                            case 'does-not-meet':
+                                                                echo '';
                                                                 break;
-                                                            default: echo $status;
+                                                            default:
+                                                                echo $status;
                                                         endswitch;
                                                         ?>'></span>
                                                     </span>
                                                 </div>
                                             </a>
 
-                                            <a href="<?= $data->report_url; ?>" tabindex="0" target="_blank" class="ga-processed alignment-status-text">
+                                            <a href="<?= $data->report_url; ?>" tabindex="0" target="_blank"
+                                               class="ga-processed alignment-status-text">
                                                 <div>
                                                     <?php
                                                     switch ($status) :
-                                                        case 'meets': echo 'Meets expectations for alignment.';
+                                                        case 'meets':
+                                                            echo 'Meets expectations for alignment.';
                                                             break;
-                                                        case 'partially-meets': echo 'Partially meets expectations for alignment.';
+                                                        case 'partially-meets':
+                                                            echo 'Partially meets expectations for alignment.';
                                                             break;
-                                                        case 'does-not-meet': echo 'Does not meet expectations for alignment.';
+                                                        case 'does-not-meet':
+                                                            echo 'Does not meet expectations for alignment.';
                                                             break;
-                                                        default: echo $status;
+                                                        default:
+                                                            echo $status;
                                                     endswitch;
                                                     ?> <span class="iamalink">Learn more</span>
                                                 </div>
@@ -394,7 +445,6 @@ function format_edseries($d) {
 
                                         <?php endif; ?>
                                     </div>
-
 
 
                                     <p class="report-link" title='View Report Gateway Scores'>
@@ -415,11 +465,12 @@ function format_edseries($d) {
                                         ];
 
                                         $repdata['gw_3'] = [
-                                            'score' => (isset($data->gateway_3_points) ? $data->gateway_3_points : '0' ),
+                                            'score' => (isset($data->gateway_3_points) ? $data->gateway_3_points : '0'),
                                             'rating' => (isset($data->gateway_3_rating) ? $data->gateway_3_rating : '-')
                                         ];
                                         ?>
-                                        <a href="javascript:void(0);" data-series-id="<?= $d->id; ?>" tabindex="0" data-report='<?= json_encode($repdata); ?>'>REPORT BREAKDOWN</a>
+                                        <a href="javascript:void(0);" data-series-id="<?= $d->id; ?>" tabindex="0"
+                                           data-report='<?= json_encode($repdata); ?>'>REPORT BREAKDOWN</a>
                                     </p>
                                     <?php /* */ ?>
                                     <div style="display:none;">
@@ -449,7 +500,8 @@ function format_edseries($d) {
     <?php
 }
 
-function enqueueStylesScripts() {
+function enqueueStylesScripts()
+{
     if (is_admin())
         return;
 
@@ -468,7 +520,8 @@ function enqueueStylesScripts() {
     wp_enqueue_script('nde_edreports', NDE_EDREPORTS_URI . '/assets/js/nde_edreports.js', array('jquery'), '1.0.0', true);
 }
 
-function wpedreports_admin_notice__nuked() {
+function wpedreports_admin_notice__nuked()
+{
     ?>
     <div class="notice notice-warning">
         <p>The EDReports Data has been cleaned!</p>
@@ -476,7 +529,8 @@ function wpedreports_admin_notice__nuked() {
     <?php
 }
 
-function wpedreports_admin_notice__nuke_failed() {
+function wpedreports_admin_notice__nuke_failed()
+{
     ?>
     <div class="notice notice-error">
         <p>Clearing of EdReports data encountered unexpected problems!!</p>
@@ -484,51 +538,60 @@ function wpedreports_admin_notice__nuke_failed() {
     <?php
 }
 
-function wpedreports_init() {
+function wpedreports_init()
+{
     enqueueStylesScripts();
     if (is_admin()) {
         if (isset($_POST['edreports_manual_update'])) {
             $function = $_POST['edreports_manual_update'];
-            $limit = !empty( (int)$_POST['limit']) ? (int) $_POST['limit'] : 5;
-            $forcereload = isset($_POST['forcereload']) && $_POST['forcereload']=='1';
+            $limit = !empty((int)$_POST['limit']) ? (int)$_POST['limit'] : 5;
+            $forcereload = isset($_POST['forcereload']) && $_POST['forcereload'] == '1';
             $updateage = $_POST['updateage'] ?? 0;
             switch ($function) {
-                case 'grades': nde_edreports_datapull_grades_func();
-                    $results='noupdates';
+                case 'grades':
+                    nde_edreports_datapull_grades_func();
+                    $results = 'noupdates';
                     break;
-                case 'subjects': nde_edreports_datapull_subjects_func();
-                    $results='noupdates';
+                case 'subjects':
+                    nde_edreports_datapull_subjects_func();
+                    $results = 'noupdates';
                     break;
-                case 'publishers': nde_edreports_datapull_publishers_func($limit, $forcereload);
+                case 'publishers':
+                    nde_edreports_datapull_publishers_func($limit, $forcereload);
                     break;
-                case 'reports': nde_edreports_datapull_reports_func($limit, $forcereload);
-                    $results='noupdates';
+                case 'reports':
+                    nde_edreports_datapull_reports_func($limit, $forcereload);
+                    $results = 'noupdates';
                     break;
-                case 'reportsdetails': $results = nde_edreports_datapull_reports_details_func($limit);
+                case 'reportsdetails':
+                    $results = nde_edreports_datapull_reports_details_func($limit);
                     break;
-                case 'types': nde_edreports_datapull_reporttypes_func();
-                    $results='noupdates';
+                case 'types':
+                    nde_edreports_datapull_reporttypes_func();
+                    $results = 'noupdates';
                     break;
-                case 'typedetails': nde_edreports_datapull_reporttypes_details_func();
-                    $results='noupdates';
+                case 'typedetails':
+                    nde_edreports_datapull_reporttypes_details_func();
+                    $results = 'noupdates';
                     break;
-                case 'series': nde_edreports_datapull_series_func($limit, $forcereload, $updateage);
-                    $results='noupdates';
+                case 'series':
+                    nde_edreports_datapull_series_func($limit, $forcereload, $updateage);
+                    $results = 'noupdates';
                     break;
-                case 'seriesdetails': $results = nde_edreports_datapull_series_details_func($limit);
+                case 'seriesdetails':
+                    $results = nde_edreports_datapull_series_details_func($limit);
                     break;
             }
 
 
-
-            if ( isset($_POST['loop']) && $_POST['loop']=="1" ) {
-                if ( !isset($results) || $results!='noupdates') {
-                ?>
-                Reloading...
-                <script>
-                    location.reload();
-                </script>
-                <?php
+            if (isset($_POST['loop']) && $_POST['loop'] == "1") {
+                if (!isset($results) || $results != 'noupdates') {
+                    ?>
+                    Reloading...
+                    <script>
+                        location.reload();
+                    </script>
+                    <?php
                 }
             }
 
@@ -549,7 +612,8 @@ function wpedreports_init() {
 
 add_action('init', 'wpedreports_init');
 
-function refreshEdreportsData($target) {
+function refreshEdreportsData($target)
+{
     global $wpHelper;
 
     $wpHelper->debugLog('Retrieving API Data');
@@ -557,7 +621,8 @@ function refreshEdreportsData($target) {
 
 register_activation_hook(__FILE__, 'nde_edreports_activation');
 
-function nde_edreports_activation() {
+function nde_edreports_activation()
+{
     if (!wp_next_scheduled('nde_edreports_datapull_series')) {
         wp_schedule_event(time(), 'daily', 'nde_edreports_datapull_series');
     }
@@ -590,29 +655,34 @@ function nde_edreports_activation() {
 
 }
 
-function nde_edreports_resetcron() {
-    if (is_admin() && isset($_POST['manual_cron_reset']) ) {
+function nde_edreports_resetcron()
+{
+    if (is_admin() && isset($_POST['manual_cron_reset'])) {
         nde_edreports_deactivation();
         nde_edreports_activation();
     }
 }
 
-if ( isset($_POST['manual_cron_reset'] ) ) add_action('init', 'nde_edreports_resetcron');
+if (isset($_POST['manual_cron_reset'])) add_action('init', 'nde_edreports_resetcron');
 
-function nde_admin_notice__crondeact() {
+function nde_admin_notice__crondeact()
+{
     $class = 'notice notice-success';
-    $message = __( 'Cron Jobs Cleared.', 'sample-text-domain' );
-    printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
+    $message = __('Cron Jobs Cleared.', 'sample-text-domain');
+    printf('<div class="%1$s"><p>%2$s</p></div>', esc_attr($class), esc_html($message));
 }
-function nde_admin_notice__cronact() {
+
+function nde_admin_notice__cronact()
+{
     $class = 'notice notice-success';
-    $message = __( 'Cron Jobs Created.', 'sample-text-domain' );
-    printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
+    $message = __('Cron Jobs Created.', 'sample-text-domain');
+    printf('<div class="%1$s"><p>%2$s</p></div>', esc_attr($class), esc_html($message));
 }
 
 register_deactivation_hook(__FILE__, 'nde_edreports_deactivation');
 
-function nde_edreports_deactivation() {
+function nde_edreports_deactivation()
+{
     wp_clear_scheduled_hook('nde_edreports_datapull_series');
     wp_clear_scheduled_hook('nde_edreports_datapull_series_details');
     wp_clear_scheduled_hook('nde_edreports_datapull_reports');
@@ -635,41 +705,44 @@ add_action('nde_edreports_datapull_subjects', 'nde_edreports_datapull_subjects_f
 add_action('nde_edreports_datapull_reporttypes', 'nde_edreports_datapull_reporttypes_func');
 add_action('nde_edreports_datapull_reporttypes_details', 'nde_edreports_datapull_reporttypes_details_func');
 
-function nde_edreports_datapull_series_func($limit=100, $forcereload=false, $age=0) {
+function nde_edreports_datapull_series_func($limit = 100, $forcereload = false, $age = 0)
+{
     error_log('Running ' . __FUNCTION__);
-    if ( defined( 'DOING_CRON' ) ) $debug=1;
-    else $debug=2;
-    $wpHelper = new NDE\WPHelper( $debug );
+    if (defined('DOING_CRON')) $debug = 1;
+    else $debug = 2;
+    $wpHelper = new NDE\WPHelper($debug);
     $wpHelper->updateSeries($limit, $forcereload, $age);
     error_log('Finished');
 }
 
-function nde_edreports_datapull_series_details_func($limit = 5) {
+function nde_edreports_datapull_series_details_func($limit = 5)
+{
     error_log('Running ' . __FUNCTION__);
-    if ( defined( 'DOING_CRON' ) ) {
-        $debug=1;
-        $limit=100;
-    }
-    else $debug=2;
+    if (defined('DOING_CRON')) {
+        $debug = 1;
+        $limit = 100;
+    } else $debug = 2;
     $wpHelper = new NDE\WPHelper($debug);
     $result = $wpHelper->updateSeriesDetail($limit);
     error_log('Finished');
     return $result;
 }
 
-function nde_edreports_datapull_reports_func( $limit=100, $forcereload=false) {
+function nde_edreports_datapull_reports_func($limit = 100, $forcereload = false)
+{
     error_log('Running ' . __FUNCTION__);
-    if ( defined( 'DOING_CRON' ) ) $debug=1;
-    else $debug=2;
+    if (defined('DOING_CRON')) $debug = 1;
+    else $debug = 2;
     $wpHelper = new NDE\WPHelper($debug);
-    $wpHelper->updateReports( $limit, $forcereload);
+    $wpHelper->updateReports($limit, $forcereload);
     error_log('Finished');
 }
 
-function nde_edreports_datapull_reports_details_func($limit=15) {
+function nde_edreports_datapull_reports_details_func($limit = 15)
+{
     error_log('Running ' . __FUNCTION__);
-    if ( defined( 'DOING_CRON' ) ) $debug=1;
-    else $debug=2;
+    if (defined('DOING_CRON')) $debug = 1;
+    else $debug = 2;
     $wpHelper = new NDE\WPHelper($debug);
     $results = $wpHelper->updateReportDetails($limit);
     error_log('Finished running ' . __FUNCTION__);
@@ -677,53 +750,59 @@ function nde_edreports_datapull_reports_details_func($limit=15) {
 }
 
 
-function nde_edreports_datapull_publishers_func($limit=100, $forcereload = false) {
+function nde_edreports_datapull_publishers_func($limit = 100, $forcereload = false)
+{
     error_log('Running ' . __FUNCTION__);
-    if ( defined( 'DOING_CRON' ) ) $debug=1;
-    else $debug=2;
+    if (defined('DOING_CRON')) $debug = 1;
+    else $debug = 2;
 
     $wpHelper = new NDE\WPHelper($debug);
     $wpHelper->updatePublishers($limit, $forcereload);
     error_log('Finished');
 }
 
-function nde_edreports_datapull_reporttypes_details_func() {
+function nde_edreports_datapull_reporttypes_details_func()
+{
     error_log('Running ' . __FUNCTION__);
-    if ( defined( 'DOING_CRON' ) ) $debug=1;
-    else $debug=2;
+    if (defined('DOING_CRON')) $debug = 1;
+    else $debug = 2;
     $wpHelper = new NDE\WPHelper($debug);
     $wpHelper->updateReportTypesDetails();
     error_log('Finished');
 }
 
-function nde_edreports_datapull_reporttypes_func() {
+function nde_edreports_datapull_reporttypes_func()
+{
     error_log('Running ' . __FUNCTION__);
-    if ( defined( 'DOING_CRON' ) ) $debug=1;
-    else $debug=2;
+    if (defined('DOING_CRON')) $debug = 1;
+    else $debug = 2;
     $wpHelper = new NDE\WPHelper($debug);
     $wpHelper->updateReportTypes();
     error_log('Finished');
 }
 
-function nde_edreports_datapull_grades_func() {
+function nde_edreports_datapull_grades_func()
+{
     error_log('Running ' . __FUNCTION__);
-    if ( defined( 'DOING_CRON' ) ) $debug=1;
-    else $debug=2;
+    if (defined('DOING_CRON')) $debug = 1;
+    else $debug = 2;
     $wpHelper = new NDE\WPHelper($debug);
     $wpHelper->updateGrades();
     error_log('Finished');
 }
 
-function nde_edreports_datapull_subjects_func() {
+function nde_edreports_datapull_subjects_func()
+{
     error_log('Running ' . __FUNCTION__);
-    if ( defined( 'DOING_CRON' ) ) $debug=1;
-    else $debug=2;
+    if (defined('DOING_CRON')) $debug = 1;
+    else $debug = 2;
     $wpHelper = new NDE\WPHelper($debug);
     $wpHelper->updateSubjects();
     error_log('Finished');
 }
 
-function nde_edreports_add_intervals($schedules) {
+function nde_edreports_add_intervals($schedules)
+{
     // add a 'weekly' interval
     $schedules['weekly'] = array(
         'interval' => 604800,
@@ -742,7 +821,8 @@ function nde_edreports_add_intervals($schedules) {
 
 add_filter('cron_schedules', 'nde_edreports_add_intervals');
 
-function wpedreports_create_menu() {
+function wpedreports_create_menu()
+{
     $edreplogo = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+DQo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB3aWR0aD0iMTIxLjMyNnB4IiBoZWlnaHQ9IjEyMS4zMjdweCIgdmlld0JveD0iMjQ1IDMzNS42ODQgMTIxLjMyNiAxMjEuMzI3IiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDI0NSAzMzUuNjg0IDEyMS4zMjYgMTIxLjMyNyINCgkgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+DQo8dGl0bGU+ZWRyZXBvcnRzX2xvZ29fY215azwvdGl0bGU+DQo8cGF0aCBmaWxsPSIjRkZENzc3IiBkPSJNMjk5Ljk0MywzMzUuNjg0djU0Ljk0M0gyNDVDMjQ3LjY4NCwzNjEuNTMxLDI3MC44NDcsMzM4LjM2OCwyOTkuOTQzLDMzNS42ODR6Ii8+DQo8cGF0aCBmaWxsPSIjMDBBQUU3IiBkPSJNMzY2LjMyNiwzOTAuNjI3aC01NS4wODR2LTU0Ljk0M0MzNDAuNDc5LDMzOC4zNjgsMzYzLjUwMiwzNjEuNTMxLDM2Ni4zMjYsMzkwLjYyN3oiLz4NCjxwYXRoIGZpbGw9IiM0OTU5NjUiIGQ9Ik0yNDUsNDAyLjA2OGg1NC45NDN2NTQuOTQyQzI3MC44NDcsNDU0LjE4NiwyNDcuNjg0LDQzMS4xNjQsMjQ1LDQwMi4wNjh6Ii8+DQo8L3N2Zz4NCg==";
     add_menu_page('WP EdReports Tools', 'EDReports', 'administrator', __FILE__, 'edreports_tools_page', "data:image/svg+xml;base64," . $edreplogo);
     add_options_page('WP EdReports Settings', 'EDReports', 'manage_options', 'edreports_settings', 'edreports_plugin_settings_page');
@@ -751,26 +831,32 @@ function wpedreports_create_menu() {
 
 add_action('admin_menu', 'wpedreports_create_menu');
 
-function register_wpedreports_settings() {
+function register_wpedreports_settings()
+{
     register_setting('wpedreports-settings-group', 'edrepsettings');
 }
 
-function edreports_tools_page() {
+function edreports_tools_page()
+{
     ?>
     <h2>Clear all EdReports Data</h2>
     <form method="post">
-        <hr />
+        <hr/>
         <table class="form-table">
             <tr valign="top">
                 <th scope="row">Clear EdReports Data</th>
                 <td>
-                    <input type="text" name="nukepassphrase" value="" placeholder="" /><small>Type in <em>NUKEEDREPORTS</em></small><br />
-                    <button class="button button-primary button-large" name="nukeEdReports" value="1">Dump all EdReport's Cached Data</button>
+                    <input type="text" name="nukepassphrase" value="" placeholder=""/>
+                    <small>Type in <em>NUKEEDREPORTS</em></small>
+                    <br/>
+                    <button class="button button-primary button-large" name="nukeEdReports" value="1">Dump all
+                        EdReport's Cached Data
+                    </button>
                 </td>
             </tr>
         </table>
     </form>
-    <hr />
+    <hr/>
     <h2>Manual Refresh Of Data</h2>
     <form method='post' target='_blank'>
         <table class="form-table">
@@ -800,7 +886,7 @@ function edreports_tools_page() {
             <tr valign="top">
                 <th scope="row">How many days ago to check for updates?</th>
                 <td>
-                    <input type='number' value='0' name="updateage" />
+                    <input type='number' value='0' name="updateage"/>
                 </td>
             </tr>
             <tr valign="top">
@@ -813,19 +899,45 @@ function edreports_tools_page() {
             <tr valign="top">
                 <th scope="row">Table</th>
                 <td>
-                    <button class='button-large button button-primary' onclick="jQuery(this).removeClass('button-primary')" name='edreports_manual_update' value='grades' value='1'>Grades</button>
-                    <button class='button-large button button-primary' onclick="jQuery(this).removeClass('button-primary')" name='edreports_manual_update' value='subjects' value='1'>Subjects</button>
-                    <button class='button-large button button-primary' onclick="jQuery(this).removeClass('button-primary')" name='edreports_manual_update' value='publishers' value='1'>Publishers</button>
-                    <hr />
-                    <button class='button-large button button-primary' onclick="jQuery(this).removeClass('button-primary')" name='edreports_manual_update' value='types' value='1'>Report Types</button>
-                    <button class='button-large button button-primary' onclick="jQuery(this).removeClass('button-primary')" name='edreports_manual_update' value='typedetails' value='1'>Report Type Details</button>
-                    <hr />
-                    <button class='button-large button button-primary' onclick="jQuery(this).removeClass('button-primary')" name='edreports_manual_update' value='series' value='1'>Series</button>
-                    <button class='button-large button button-primary' onclick="jQuery(this).removeClass('button-primary')" name='edreports_manual_update' value='seriesdetails' value='1'>Series Details (Uses limit)</button>
-                    <hr />
-                    <button class='button-large button button-primary' onclick="jQuery(this).removeClass('button-primary')" name='edreports_manual_update' value='reports' value='1'>Reports</button>
-                    <button class='button-large button button-primary' onclick="jQuery(this).removeClass('button-primary')" name='edreports_manual_update' value='reportsdetails' value='1'>Report Details</button>
-
+                    <button class='button-large button button-primary'
+                            onclick="jQuery(this).removeClass('button-primary')" name='edreports_manual_update'
+                            value='grades' value='1'>Grades
+                    </button>
+                    <button class='button-large button button-primary'
+                            onclick="jQuery(this).removeClass('button-primary')" name='edreports_manual_update'
+                            value='subjects' value='1'>Subjects
+                    </button>
+                    <button class='button-large button button-primary'
+                            onclick="jQuery(this).removeClass('button-primary')" name='edreports_manual_update'
+                            value='publishers' value='1'>Publishers
+                    </button>
+                    <hr/>
+                    <button class='button-large button button-primary'
+                            onclick="jQuery(this).removeClass('button-primary')" name='edreports_manual_update'
+                            value='types' value='1'>Report Types
+                    </button>
+                    <button class='button-large button button-primary'
+                            onclick="jQuery(this).removeClass('button-primary')" name='edreports_manual_update'
+                            value='typedetails' value='1'>Report Type Details
+                    </button>
+                    <hr/>
+                    <button class='button-large button button-primary'
+                            onclick="jQuery(this).removeClass('button-primary')" name='edreports_manual_update'
+                            value='series' value='1'>Series
+                    </button>
+                    <button class='button-large button button-primary'
+                            onclick="jQuery(this).removeClass('button-primary')" name='edreports_manual_update'
+                            value='seriesdetails' value='1'>Series Details (Uses limit)
+                    </button>
+                    <hr/>
+                    <button class='button-large button button-primary'
+                            onclick="jQuery(this).removeClass('button-primary')" name='edreports_manual_update'
+                            value='reports' value='1'>Reports
+                    </button>
+                    <button class='button-large button button-primary'
+                            onclick="jQuery(this).removeClass('button-primary')" name='edreports_manual_update'
+                            value='reportsdetails' value='1'>Report Details
+                    </button>
 
 
                 </td>
@@ -833,14 +945,15 @@ function edreports_tools_page() {
             <tr>
                 <th></th>
                 <td>
-                    Each button opens a new window to process request. Only Series Details and Report Details should really bu used with continuous looping.
+                    Each button opens a new window to process request. Only Series Details and Report Details should
+                    really bu used with continuous looping.
                 </td>
             </tr>
         </table>
 
     </form>
     <form method="post">
-        <hr />
+        <hr/>
         <table class="form-table">
             <tr valign="top">
                 <th scope="row">Force Reset of Cron Timings</th>
@@ -852,11 +965,11 @@ function edreports_tools_page() {
     </form>
 
 
-
     <?php
 }
 
-function edreports_plugin_settings_page() {
+function edreports_plugin_settings_page()
+{
     ?>
     <div class="wrap">
         <h1>WP EdReports Integration</h1>
@@ -871,7 +984,9 @@ function edreports_plugin_settings_page() {
                     <td>
                         <select name="edrepsettings[environment]">
                             <option value="TESTING">TESTING</option>
-                            <option value="LIVE" <?= isset($er['environment']) && esc_attr($er['environment']) == 'LIVE' ? 'selected="SELECTED"' : ''; ?>>LIVE</option>
+                            <option value="LIVE" <?= isset($er['environment']) && esc_attr($er['environment']) == 'LIVE' ? 'selected="SELECTED"' : ''; ?>>
+                                LIVE
+                            </option>
                         </select>
                     </td>
                 </tr>
@@ -880,38 +995,44 @@ function edreports_plugin_settings_page() {
                     <td>
                         <select name="edrepsettings[authType]">
                             <option value="none">None</option>
-                            <option value="basic" <?= isset($er['authType']) && esc_attr($er['authType']) == 'basic' ? 'selected="SELECTED"' : ''; ?>>Basic</option>
+                            <option value="basic" <?= isset($er['authType']) && esc_attr($er['authType']) == 'basic' ? 'selected="SELECTED"' : ''; ?>>
+                                Basic
+                            </option>
                         </select>
                     </td>
                 </tr>
                 <tr valign="top">
                     <th scope="row">Basic Auth User</th>
-                    <td><input type="text" name="edrepsettings[userName]" value="<?php echo isset($er['userName']) ? esc_attr($er['userName']) : ''; ?>" /></td>
+                    <td><input type="text" name="edrepsettings[userName]"
+                               value="<?php echo isset($er['userName']) ? esc_attr($er['userName']) : ''; ?>"/></td>
                 </tr>
                 <tr valign="top">
                     <th scope="row">Basic Auth Password</th>
-                    <td><input type="password" name="edrepsettings[password]" value="<?php echo isset($er['password']) ? esc_attr($er['password']) : ''; ?>" /></td>
+                    <td><input type="password" name="edrepsettings[password]"
+                               value="<?php echo isset($er['password']) ? esc_attr($er['password']) : ''; ?>"/></td>
                 </tr>
                 <tr valign="top">
                     <th scope="row">API Key</th>
-                    <td><input type="password" name="edrepsettings[key]" value="<?php echo isset($er['key']) ? esc_attr($er['key']) : ''; ?>" /></td>
+                    <td><input type="password" name="edrepsettings[key]"
+                               value="<?php echo isset($er['key']) ? esc_attr($er['key']) : ''; ?>"/></td>
                 </tr>
                 <tr valign="top">
                     <th scope="row">Debug Level</th>
                     <td>
                         <select name="edrepsettings[debug]">
                             <option value="0">None</option>
-                            <option value="1" <?= isset($er['debug']) && esc_attr($er['debug']) == '1' ? 'selected="SELECTED"' : ''; ?>>1 - Log File</option>
-                            <option value="2" <?= isset($er['debug']) && esc_attr($er['debug']) == '2' ? 'selected="SELECTED"' : ''; ?>>2 - On-screen</option>
+                            <option value="1" <?= isset($er['debug']) && esc_attr($er['debug']) == '1' ? 'selected="SELECTED"' : ''; ?>>
+                                1 - Log File
+                            </option>
+                            <option value="2" <?= isset($er['debug']) && esc_attr($er['debug']) == '2' ? 'selected="SELECTED"' : ''; ?>>
+                                2 - On-screen
+                            </option>
                         </select>
                     </td>
                 </tr>
             </table>
 
             <?php submit_button(); ?>
-
-
-
 
 
         </form>
