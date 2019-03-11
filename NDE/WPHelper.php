@@ -771,7 +771,14 @@ class WPHelper {
                     if (empty($detaildata->series_id))
                         $detaildata->series_id = 0;
                     $serData = base64_encode(serialize($detaildata));
-                    $result = $wpdb->replace($details_table, ['id' => $rid, 'series_id' => $detaildata->series_id, 'data' => $serData]);
+                    $result = $wpdb->replace($details_table, [
+                        'id' => $rid,
+                        'series_id' => $detaildata->series_id,
+                        'data' => $serData,
+                        'gateway_1'=> $detaildata->gateway_1_rating,
+                        'gateway_2'=> $detaildata->gateway_2_rating,
+                        'gateway_3'=> $detaildata->gateway_3_rating
+                        ]);
                     if ($result === FALSE)
                         $this->debugLog('GROUP: Unable to update reports details for ' . $rid);
                     else
