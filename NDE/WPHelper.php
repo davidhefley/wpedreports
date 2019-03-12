@@ -103,6 +103,8 @@ class WPHelper {
 
         $qry .= " ORDER BY cast(grade as unsigned)";
 
+        //echo str_replace('%d', $series_id, $qry);
+
         $params = [$series_id];
         $qry = $wpdb->prepare($qry, $params);
         $reports = $wpdb->get_results($qry);
@@ -985,22 +987,26 @@ class WPHelper {
                 'title' => $details->gateway_1_title,
                 'intervals' => base64_encode(serialize($details->gateway_1_intervals))
             ];
-            $wpdb->replace($table_name, $insert_data);
+            $r = $wpdb->replace($table_name, $insert_data);
+            if ( !$r ) $this->debugLog('Error inserting for ' . $type->id .' for gateway 1');
+
             $insert_data = [
                 'id' => $type->id,
                 'gateway' => '2',
                 'title' => $details->gateway_2_title,
                 'intervals' => base64_encode(serialize($details->gateway_2_intervals))
             ];
+            $r = $wpdb->replace($table_name, $insert_data);
+            if ( !$r ) $this->debugLog('Error inserting for ' . $type->id .' for gateway 2');
 
-            $wpdb->replace($table_name, $insert_data);
             $insert_data = [
                 'id' => $type->id,
                 'gateway' => '3',
                 'title' => $details->gateway_3_title,
                 'intervals' => base64_encode(serialize($details->gateway_3_intervals))
             ];
-            $wpdb->replace($table_name, $insert_data);
+            $r = $wpdb->replace($table_name, $insert_data);
+            if ( !$r ) $this->debugLog('Error inserting for ' . $type->id .' for gateway 3');
         }
     }
 
