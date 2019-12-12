@@ -55,16 +55,18 @@ function debugAPI()
  */
 function edreportnextpage_func()
 {
+	global $wpHelper;
+
     $subject = isset($_GET['subject']) ? (int)$_GET['subject'] : '';
     $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
     $perpage = isset($_GET['perpage']) ? (int)$_GET['perpage'] : 10;
     $text = isset($_GET['textsearch']) ? sanitize_text_field($_GET['textsearch']) : '';
+	$type = isset($_GET['type']) ? sanitize_text_field($_GET['type']) : '';
     $grades = isset($_GET['grades']) ? $_GET['grades'] : [];
     $status = isset($_GET['status']) ? $_GET['status'] : [];
-    global $wpHelper;
     $wpHelper->queryStart(($perpage * $page));
     $wpHelper->queryLimit($perpage);
-    $series = $wpHelper->series($subject, $grades, $text, 'none', $status);
+    $series = $wpHelper->series($subject, $grades, $text, 'none', $status, $type);
     if (!empty($series)) :
         foreach ($series as $s) :
             format_edseries($s, $status);
@@ -88,11 +90,14 @@ function edrep_filter_bar($atts = [], $content = '')
 {
     $atts = shortcode_atts(array(
         'subject' => '27', //5->MATH, 27->ELA (but should get from db instead)
+	    'type' => '' // textbook or foundational-skill
     ), $atts, 'edrep_listing');
     extract($atts);
     ob_start();
     ?>
     <form id='edreportFilterForm'>
+	    <input type="hidden" name="type" value="<?=$type;?>" />
+
         <div class='edreport_filter'>
             <div class='filtertitle'>
                 <h3>Filter Results</h3>
@@ -176,25 +181,46 @@ function edrep_filter_bar($atts = [], $content = '')
 
 add_shortcode('edrep_filter_bar', 'edrep_filter_bar');
 
+	/**
+	 *
+	 * @param $atts
+	 * @param string $content
+	 *
+	 * @return false|string
+	 */
 function edrep_listing($atts, $content = '')
 {
     $atts = shortcode_atts(array(
         'subject' => '27', //5->MATH, 27->ELA (but should get from db instead)
-        'perpage' => 10
+        'perpage' => 10,
+	    'type'=>''
     ), $atts, 'edrep_listing');
     /**
      * @var int $subject Subject ID
      * @var int $perpage Number to show per page
+     * @var string $type Differentiate between textbook and foundational-skill
      */
     extract($atts);
     ob_start();
     global $wpHelper;
     $wpHelper->queryLimit($perpage);
-    $series = $wpHelper->series($subject);
+    //int $subject = null, array $grades = [], string $text = '', string $state = 'none', array $status = [], string $type = ''
+    $series = $wpHelper->series( (int) $subject, [], '', 'none', [], $type);
 
     $report_intervals = $wpHelper->reportIntervals();
     $imagePath = NDE_EDREPORTS_URI . '/assets/images/';
-    wp_localize_script('nde_edreports', 'edrep', ['ajaxurl' => admin_url('admin-ajax.php'), 'subject' => (int)$subject, 'perpage' => (int)$perpage, 'page' => 1, 'intervals' => $report_intervals, 'images' => $imagePath]);
+    wp_localize_script(
+    		'nde_edreports',
+		    'edrep',
+		    [
+		    		'ajaxurl' => admin_url('admin-ajax.php'),
+				    'subject' => (int)$subject,
+				    'perpage' => (int)$perpage,
+				    'type'=>$type,
+				    'page' => 1,
+				    'intervals' => $report_intervals,
+				    'images' => $imagePath
+		    ]);
     if (!empty($series)) :
         ?>
         <div id="edReportHolder" style="opacity:0"><?php
@@ -343,6 +369,7 @@ function format_edseries($d, $statusFilter=[])
                     <div class='reports' data-slick='{"slidesToShow": <?= $sts; ?>, "slidesToScroll":<?= $sts; ?>}'>
                         <?php
                         //$status = ['does-not-meet', 'meets', 'partially-meets'];
+                        $errorCount = 0;
                         if (!empty($seriesReports))
                             foreach ($seriesReports as $report) :
                                 $decoded = base64_decode($report->data);
@@ -358,16 +385,23 @@ function format_edseries($d, $statusFilter=[])
                                 if (empty($data)) {
                                     /*print_r($report);*/
                                     //echo "<div style='display:none'>" . print_r($report->data) ."</div>";
-                                    echo "INVALID REPORT DATA - CONTINUING";
+                                    $wpHelper->deleteReportDetail($report->id);
+                                    $errorCount++;
+                                    ?>
+                                    <div class="report error" id='report_<?= $report->id; ?>'>
+                                        This report is currently queued for retrieval.
+                                    </div>
+                                    <?php
                                     continue;
                                 }
-                                if ($data->gateway_1_rating == 'meets' && $data->gateway_2_rating == 'meets' && $data->gateway_3_rating == 'meets') {
+                                $status = 'unknown';
+                                if ($data->gateway_1_rating == 'meets' && $data->gateway_2_rating == 'meets') { // && $data->gateway_3_rating == 'meets') {
                                     $status = 'meets';
                                 } else {
-                                    if ($data->gateway_1_rating == 'partially-meets' || $data->gateway_2_rating == 'partially-meets' || $data->gateway_3_rating == 'partially-meets') {
+                                    if ($data->gateway_1_rating == 'partially-meets' || $data->gateway_2_rating == 'partially-meets') { // || $data->gateway_3_rating == 'partially-meets') {
                                         $status = 'partially-meets';
                                     }
-                                    if ($data->gateway_1_rating == 'does-not-meet' || $data->gateway_2_rating == 'does-not-meet' || $data->gateway_3_rating == 'does-not-meet') {
+                                    if ($data->gateway_1_rating == 'does-not-meet' || $data->gateway_2_rating == 'does-not-meet') { // || $data->gateway_3_rating == 'does-not-meet') {
                                         $status = 'does-not-meet';
                                     }
                                 }
@@ -450,7 +484,7 @@ function format_edseries($d, $statusFilter=[])
                                     <p class="report-link" title='View Report Gateway Scores'>
                                         <?php
                                         $repdata = [
-                                            'title' => $d->title,
+                                            'title' => htmlentities( $d->title, ENT_QUOTES),
                                             'url' => $data->report_url,
                                             'grade' => $report->description,
                                             'type' => $report->report_type
@@ -470,19 +504,24 @@ function format_edseries($d, $statusFilter=[])
                                         ];
                                         ?>
                                         <a href="javascript:void(0);" data-series-id="<?= $d->id; ?>" tabindex="0"
-                                           data-report='<?= json_encode($repdata); ?>'>REPORT BREAKDOWN</a>
+                                           data-report='<?= json_encode($repdata, ENT_NOQUOTES); ?>'>REPORT BREAKDOWN</a>
                                     </p>
                                     <?php /* */ ?>
                                     <div style="display:none;">
                                         <pre>
-                                            <?= print_r($d); ?>
-                                            <?= print_r($repdata); ?>
-                                            <?= print_r($data); ?>
+                                            <?php //echo print_r($d); ?>
+                                            <?php //echo print_r($repdata); ?>
+                                            <?php //echo print_r($data); ?>
                                         </pre>
                                     </div>
                                     <?php /* */ ?>
                                 </div>
                             <?php endforeach; ?>
+                        <?php
+                        if ( $errorCount ) {
+                            //$wpHelper->updateReportDetails($errorCount);
+                        }
+                        ?>
                     </div>
 
                 </div>
@@ -560,7 +599,7 @@ function wpedreports_init()
                     nde_edreports_datapull_publishers_func($limit, $forcereload);
                     break;
                 case 'reports':
-                    nde_edreports_datapull_reports_func($limit, $forcereload);
+                    nde_edreports_datapull_reports_func($limit, $forcereload, $updateage);
                     $results = 'noupdates';
                     break;
                 case 'reportsdetails':
@@ -728,13 +767,13 @@ function nde_edreports_datapull_series_details_func($limit = 5)
     return $result;
 }
 
-function nde_edreports_datapull_reports_func($limit = 100, $forcereload = false)
+function nde_edreports_datapull_reports_func($limit = 100, $forcereload = false, $age = 0)
 {
     error_log('Running ' . __FUNCTION__);
     if (defined('DOING_CRON')) $debug = 1;
     else $debug = 2;
     $wpHelper = new NDE\WPHelper($debug);
-    $wpHelper->updateReports($limit, $forcereload);
+    $wpHelper->updateReports($limit, $forcereload, $age);
     error_log('Finished');
 }
 

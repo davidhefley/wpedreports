@@ -61,40 +61,42 @@ class EdReportAPI {
         }
     }
 
-    /**
-     * Retrieve subjects.  It has low volatility, so we cache it for a day
-     * @param int $age in minutes
-     */
+	/**
+	 * Retrieve subjects.
+	 *
+	 * @return array|bool
+	 * @throws \Exception
+	 */
     public function subjects() {
         $this->debugLog('Getting Subjects');
         $data = $this->getDataList('taxonomies_subjects');
-        //$this->debugLog($data);
         return $data;
     }
 
-    /**
-     * Retrieve grades.  It has low volatility, so we cache it for a day
-     * @param int $age in minutes
-     */
-    public function grades($age = 1440) {
+
+	/**
+	 * Retrieve grades.  It has low volatility
+	 * @return array|bool
+	 * @throws \Exception
+	 */
+    public function grades() {
         $this->debugLog('Getting Grades');
         $data = $this->getDataList('taxonomies_grades');
-        //$this->debugLog($data);
         return $data;
     }
 
-    /**
-     *
-     * Retrieves the publishers data.  It will limit to a specific page, and number per return, and also allow for the
-     * filter_[updated|deleted] parameter to be set with a date ($since) formatted as YYYY-MM-DD to retrieve items
-     * updated after that date.
-     *
-     * @param int $page
-     * @param int $perpage
-     * @param string $since
-     * @param string $type
-     * @return object
-     */
+	/**
+	 * Retrieves the publishers data.  It will limit to a specific page, and number per return, and also allow for the
+	 * filter_[updated|deleted] parameter to be set with a date ($since) formatted as YYYY-MM-DD to retrieve items
+	 * updated after that date.
+	 * @param int $page
+	 * @param int $perpage
+	 * @param string $since
+	 * @param string $type
+	 *
+	 * @return array
+	 * @throws \Exception
+	 */
     public function publishers(int $page = 1, int $perpage = 5, string $since='', string $type=''):array {
         $this->debugLog('Getting Publishers');
         $parameters = [];
@@ -109,10 +111,19 @@ class EdReportAPI {
         return $data ?? [];
     }
 
-    /**
-     * Retrieve series.
-     * @param int $age in minutes
-     */
+	/**
+	 * Retrieve series.
+	 *
+	 * @param string $publisher
+	 * @param string $subject
+	 * @param int $page
+	 * @param int $perpage
+	 * @param string $since
+	 * @param string $type
+	 *
+	 * @return array|bool
+	 * @throws \Exception
+	 */
     public function series($publisher = '', $subject = '', $page = 1, $perpage = 5, $since='', $type='') {
         $this->debugLog('Getting Series');
         $parameters = [];
@@ -131,21 +142,34 @@ class EdReportAPI {
         return $data;
     }
 
-    /**
-     * Retrieve series detail.
-     * @param int $age in minutes
-     */
-    public function seriesDetail($entity) {
+	/**
+	 * Retrieve series detail.
+	 *
+	 * @param $series_id
+	 *
+	 * @return array|bool|mixed|object
+	 * @throws \Exception
+	 */
+    public function seriesDetail( $series_id ) {
         $this->debugLog('Getting Series Details');
-        $data = $this->getDataDetails('series', $entity);
-        //$this->debugLog($data);
+        $data = $this->getDataDetails('series', $series_id);
         return $data;
     }
 
-    /**
-     * Retrieve reports.
-     * @param int $age in minutes
-     */
+	/**
+	 * Retrieve reports.
+	 *
+	 * @param string $subject
+	 * @param string $grade
+	 * @param string $publisher
+	 * @param int $page
+	 * @param int $perpage
+	 * @param string $since
+	 * @param string $type
+	 *
+	 * @return array|bool
+	 * @throws \Exception
+	 */
     public function reports($subject = '', $grade = '', $publisher = '', $page = 1, $perpage = 5, $since='', $type='') {
         $this->debugLog('Getting Reports');
         $parameters = [];
@@ -162,46 +186,49 @@ class EdReportAPI {
         if ( !empty($since) && in_array($type, ['updated','deleted']) )
             $parameters['filter_' . $type ] = $since;
         $data = $this->getDataList('reports', $parameters);
-        //$this->debugLog($data);
         return $data;
     }
 
-    /**
-     * Retrieve series detail.
-     * @param int $age in minutes
-     */
-    public function reportsDetail($entity) {
-        $data = $this->getDataDetails('reports', $entity);
+	/**
+	 * Retrieve Reports detail.
+	 * @param $report_id
+	 *
+	 * @return array|bool|mixed|object
+	 * @throws \Exception
+	 */
+    public function reportsDetail( $report_id ) {
+        $data = $this->getDataDetails('reports', $report_id);
         $this->debugLog('Retrieved Data for: '. $data->id.":" . $data->title);
         return $data;
     }
 
     /**
-     * Retrieve reports.
-     * @param int $age in minutes
+     * Retrieve report types.
      */
     public function reportTypes() {
         $this->debugLog('Getting Report Types');
         $data = $this->getDataList('report_types');
-        //$this->debugLog($data);
         return $data;
     }
 
-    /**
-     * Retrieve report types detail.
-     * @param int $age in minutes
-     */
-    public function reportTypesDetail($entity) {
+	/**
+	 * Retrieve report types detail
+	 *
+	 * @param $report_type_id
+	 *
+	 * @return array|bool|mixed|object
+	 * @throws \Exception
+	 */
+    public function reportTypesDetail( $report_type_id ) {
         $this->debugLog('Getting Report Type Details');
-        $data = $this->getDataDetails('report_types', $entity);
-        //$this->debugLog($data);
+        $data = $this->getDataDetails('report_types', $report_type_id);
         return $data;
     }
 
     /**
      * Re-index data so it comes back as id=>$data in array
      * @param type $data
-     * @return type
+     * @return array
      */
     private function reIndexResult($data) {
         $final = [];
@@ -215,10 +242,11 @@ class EdReportAPI {
         return $final;
     }
 
-    /**
-     * Do we have everything we need to actually retreive data??
-     * @throws Exception
-     */
+	/**
+	 * Do we have everything we need to actually retreive data?? Pre-flight check
+	 * @return bool
+	 * @throws \Exception
+	 */
     private function checkInfo() {
 
         if ( empty($this->url) ) throw new \Exception('Missing URL.');
@@ -237,16 +265,17 @@ class EdReportAPI {
         endswitch;
     }
 
-    /**
-     * Actually go to the endpoint and retrieve the data list
-     * @param string $endpoint
-     * @param int $page
-     * @return mixed
-     * @throws Exception
-     */
+	/**
+	 * Actually go to the endpoint and retrieve the data list
+	 *
+	 * @param $endpoint
+	 * @param $id
+	 *
+	 * @return array|bool|mixed|object
+	 * @throws \Exception
+	 */
     private function getDataDetails($endpoint, $id) {
         $this->debugLog(__FUNCTION__);
-
         //Just in case we need to loop pages!
         $this->checkInfo();
         $final = $this->url . $endpoint . '/' . $id;
@@ -284,13 +313,15 @@ class EdReportAPI {
         }
     }
 
-    /**
-     * Actually go to the endpoint and retrieve the data list
-     * @param string $endpoint
-     * @param int $page
-     * @return mixed
-     * @throws Exception
-     */
+	/**
+	 * Actually go to the endpoint and retrieve the data list
+	 *
+	 * @param $endpoint
+	 * @param array $parameters
+	 *
+	 * @return array|bool
+	 * @throws \Exception
+	 */
     private function getDataList($endpoint, $parameters = []) {
         $this->debugLog(__FUNCTION__);
 

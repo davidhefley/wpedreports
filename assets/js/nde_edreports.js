@@ -171,7 +171,9 @@ function loadSeries(page, perpage, subject, callback) {
             action: 'edreportnextpage',
             page: page,
             perpage: perpage,
-            subject: subject
+            subject: subject,
+            type: edrep.type,
+
         },
         dataType: 'html',
     })
@@ -243,11 +245,12 @@ function getRatingText(x) {
 //popup the ratings report
 function showDetails(a) {
     var data = jQuery(a).data('report');
+    console.log(data);
     jQuery('.title', $popup).text(data.title);
     jQuery('.grade', $popup).text(data.grade);
     jQuery('.view a', $popup).attr('href', data.url);
     var alignment_status = '';
-    if (data.gw_1.rating == 'meets' && data.gw_2.rating == 'meets') {
+    if (data.gw_1.rating == 'meets' && ( data.gw_2 && data.gw_2 && data.gw_2.rating == 'meets' ) ) {
         alignment_status = 'meets';
     }
 
@@ -295,7 +298,8 @@ function showDetails(a) {
 function buildRatingScales(data, target) {
     var repType = data.type;
     var typeData = edrep.intervals[ repType ];
-    for (var i = 1; i < 4; i++) {
+    for (var i = 1; i <= 4; i++) {
+        if ( typeof typeData[i] == 'undefined' ) continue;
         var liString = '';
         var indiceString = '';
         for (let x = 1; x <= (parseInt(typeData[i].intervals['meets']['max'])); x++) {
