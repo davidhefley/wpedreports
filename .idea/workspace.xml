@@ -2,12 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4b617952-2137-4817-93ba-234645ef9799" name="Default Changelist" comment="updates to allow for type of report (i.e. foundational, etc)">
-      <change beforePath="$PROJECT_DIR$/.idea/deployment.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/LICENSE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/NDE/EdReportAPI.php" beforeDir="false" afterPath="$PROJECT_DIR$/NDE/EdReportAPI.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/NDE/WPHelper.php" beforeDir="false" afterPath="$PROJECT_DIR$/NDE/WPHelper.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/js/nde_edreports.js" beforeDir="false" afterPath="$PROJECT_DIR$/assets/js/nde_edreports.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wpedreports.php" beforeDir="false" afterPath="$PROJECT_DIR$/wpedreports.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -91,7 +88,7 @@
       <workItem from="1570818606026" duration="5650000" />
       <workItem from="1571402817762" duration="9882000" />
       <workItem from="1573679799740" duration="1488000" />
-      <workItem from="1576173476442" duration="605000" />
+      <workItem from="1576173476442" duration="986000" />
     </task>
     <task id="LOCAL-00001" summary="Initial">
       <created>1548771736794</created>
@@ -149,7 +146,14 @@
       <option name="project" value="LOCAL" />
       <updated>1552327434125</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="updates to allow for type of report (i.e. foundational, etc)">
+      <created>1576174108267</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1576174108267</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -177,13 +181,18 @@
     <MESSAGE value="No Functional changes." />
     <MESSAGE value="Added a filter on the meets/partially meets/does not meet status.  Changed reports database to also reflect this." />
     <MESSAGE value="Updated updateReportDetails to populate gateway results when bringing data in from the API" />
-    <option name="LAST_COMMIT_MESSAGE" value="Updated updateReportDetails to populate gateway results when bringing data in from the API" />
+    <MESSAGE value="updates to allow for type of report (i.e. foundational, etc)" />
+    <option name="LAST_COMMIT_MESSAGE" value="updates to allow for type of report (i.e. foundational, etc)" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="494" y="197" key="CommitChangelistDialog2" timestamp="1576173519536">
+    <state x="494" y="197" key="CommitChangelistDialog2" timestamp="1576174120167">
       <screen x="67" y="0" width="1853" height="1200" />
     </state>
-    <state x="494" y="197" key="CommitChangelistDialog2/67.0.1853.1200/1920.0.1920.1200/3840.0.1920.1200@67.0.1853.1200" timestamp="1576173519536" />
+    <state x="494" y="197" key="CommitChangelistDialog2/67.0.1853.1200/1920.0.1920.1200/3840.0.1920.1200@67.0.1853.1200" timestamp="1576174120167" />
+    <state x="585" y="335" key="Vcs.Push.Dialog.v2" timestamp="1576174127896">
+      <screen x="67" y="0" width="1853" height="1200" />
+    </state>
+    <state x="585" y="335" key="Vcs.Push.Dialog.v2/67.0.1853.1200/1920.0.1920.1200/3840.0.1920.1200@67.0.1853.1200" timestamp="1576174127896" />
   </component>
   <component name="WordPressConfiguration" enabled="true">
     <wordpressPath>C:\Users\david.hefley\wordpress-5.0.3</wordpressPath>
