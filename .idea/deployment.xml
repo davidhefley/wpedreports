@@ -23,6 +23,13 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="Dev9v-InsideNDE">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="INSIDENDE - VR">
         <serverdata>
           <mappings>
@@ -65,7 +72,21 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="NIMC - PRODUCTION (project level)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/wp-content/plugins/wpedreports" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="NIMC - STAGING">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/wp-content/plugins/wpedreports" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="NIMC - STAGING (project level)">
         <serverdata>
           <mappings>
             <mapping deploy="/wp-content/plugins/wpedreports" local="$PROJECT_DIR$" web="/" />

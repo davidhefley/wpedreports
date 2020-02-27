@@ -69,7 +69,7 @@ function edreportnextpage_func()
     $series = $wpHelper->series($subject, $grades, $text, 'none', $status, $type);
     if (!empty($series)) :
         foreach ($series as $s) :
-            format_edseries($s, $status);
+            format_edseries($s, $status, $type);
         endforeach;
     else:
         if ($page == 1) echo "<div class='noseriesfound'>No More Materials Found</div>";
@@ -90,7 +90,7 @@ function edrep_filter_bar($atts = [], $content = '')
 {
     $atts = shortcode_atts(array(
         'subject' => '27', //5->MATH, 27->ELA (but should get from db instead)
-	    'type' => '' // textbook or foundational-skill
+	    'type' => '' // textbook or foundational-skill or no-foundational-skills
     ), $atts, 'edrep_listing');
     extract($atts);
     ob_start();
@@ -225,7 +225,7 @@ function edrep_listing($atts, $content = '')
         ?>
         <div id="edReportHolder" style="opacity:0"><?php
             foreach ($series as $s) :
-                format_edseries($s);
+                format_edseries($s, [], $type);
             endforeach;
             ?>
         </div>
@@ -326,9 +326,8 @@ function inject_edreport_modal()
     <?php
 }
 
-function format_edseries($d, $statusFilter=[])
+function format_edseries($d, $statusFilter=[], $type='')
 {
-
     global $wpHelper;
     $full = $wpHelper->seriesDetails($d->id,'','none');
     ?>
@@ -356,7 +355,7 @@ function format_edseries($d, $statusFilter=[])
                     </div>
                 </div>
                 <?php
-                $seriesReports = $wpHelper->seriesReports($d->id,$statusFilter);
+                $seriesReports = $wpHelper->seriesReports($d->id,$statusFilter, $type);
                 $sts = count($seriesReports);
                 if ($sts === 0 || $sts === 1)
                     $sts = 1;
@@ -365,7 +364,6 @@ function format_edseries($d, $statusFilter=[])
                 ?>
 
                 <div class='col-xs-12 col-sm-7 col-md-9'>
-
                     <div class='reports' data-slick='{"slidesToShow": <?= $sts; ?>, "slidesToScroll":<?= $sts; ?>}'>
                         <?php
                         //$status = ['does-not-meet', 'meets', 'partially-meets'];
@@ -422,7 +420,6 @@ function format_edseries($d, $statusFilter=[])
                                            title='View Full Report on EdReports.org'><?= $report->description; ?></a>
                                     </p>
                                     <div class="report-descr">
-
                                         <?php if (empty($data)): ?>
                                             <a href='javascript:void(0)'>
                                                 <div>

@@ -211,7 +211,7 @@
 			}
 		}
 
-		public function seriesReports( $series_id, $status = [] ) {
+		public function seriesReports( $series_id, $status = [], $type='' ) {
 			global $wpdb;
 			$reports_table = $wpdb->prefix . 'EdRep_reports';
 			$grades_table  = $wpdb->prefix . 'EdRep_grades';
@@ -220,6 +220,10 @@
 			$qry           .= " LEFT JOIN {$grades_table} b on a.grade_taxonomy_id = b.id";
 			$qry           .= " LEFT JOIN {$details_table} c on a.id = c.id";
 			$qry           .= " WHERE a.series_id=%d";
+
+			if ( $type == 'nfs' ) {
+				$qry .= " AND b.id IN (7,9,11)";
+			}
 
 			if ( ! empty( $status ) && count( $status ) != 3 ) {
 				$statusFilter = [];
@@ -310,6 +314,7 @@
 		 * @return array|object|null
 		 */
 		public function series( int $subject = null, array $grades = [], string $text = '', string $state = 'none', array $status = [], string $type = '' ) {
+			if ( isset($_GET['DGH'] ) ) $type = 'textbook';
 			global $wpdb;
 			$series_table        = $wpdb->prefix . 'EdRep_series';
 			$seriesdetails_table = $wpdb->prefix . 'EdRep_series_detail';
@@ -346,12 +351,20 @@
 
 
 			if ( ! empty( $type ) ) {
+				do_action( 'qm/debug', 'Type Set to: ' . $type );
 
 				$series_for_book_type = $this->getSeriesFromBookType( $type, $subject );
 				if ( empty( $series_for_book_type ) ) {
 					return [];
 				}
 				$qry .= " AND a.id IN (" . implode( ',', $series_for_book_type ) . ")";
+			} else do_action( 'qm/debug', 'Type empty' );
+
+
+			if ( $type=='nfs' && empty($grades) ) {
+				$grades=[
+					'K','1','2'
+				];
 			}
 
 			if ( ! empty( $grades ) ) {
@@ -366,6 +379,7 @@
 				}
 				$grades    = array_unique( $grades );
 				$grade_ids = $this->getGradeIds( $grades );
+
 				if ( ! empty( $grade_ids ) ) {
 					$related_series = $this->getSeriesFromGrades( $grade_ids );
 					if ( $related_series === false ) {
@@ -374,6 +388,7 @@
 					$qry .= " AND a.id IN (" . implode( ',', $related_series ) . ")";
 				}
 			}
+
 
 			$qry .= " ORDER BY a.title";
 			$qry .= " LIMIT {$this->queryStart},{$this->queryLimit}";
@@ -438,6 +453,8 @@
 			$reportdetails_table = $wpdb->prefix . 'EdRep_report_details';
 			$statusFilter        = [];
 			switch ($type) :
+				case 'nfs':
+					/*$status = [];*/
 				case 'foundational-skill':
 					foreach ( $status as $statii ) {
 						switch ( $statii ) {

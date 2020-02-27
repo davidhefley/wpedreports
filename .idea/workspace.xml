@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4b617952-2137-4817-93ba-234645ef9799" name="Default Changelist" comment="">
+    <list default="true" id="4b617952-2137-4817-93ba-234645ef9799" name="Default Changelist" comment="Updates Readme">
+      <change beforePath="$PROJECT_DIR$/.idea/deployment.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NDE/WPHelper.php" beforeDir="false" afterPath="$PROJECT_DIR$/NDE/WPHelper.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wpedreports.php" beforeDir="false" afterPath="$PROJECT_DIR$/wpedreports.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -87,7 +89,10 @@
       <workItem from="1570818606026" duration="5650000" />
       <workItem from="1571402817762" duration="9882000" />
       <workItem from="1573679799740" duration="1488000" />
-      <workItem from="1576173476442" duration="1126000" />
+      <workItem from="1576173476442" duration="1251000" />
+      <workItem from="1576848642234" duration="188000" />
+      <workItem from="1576863085010" duration="1214000" />
+      <workItem from="1582838457337" duration="2588000" />
     </task>
     <task id="LOCAL-00001" summary="Initial">
       <created>1548771736794</created>
@@ -159,7 +164,14 @@
       <option name="project" value="LOCAL" />
       <updated>1576174561197</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="Updates Readme">
+      <created>1576174618764</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1576174618764</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -189,17 +201,28 @@
     <MESSAGE value="Updated updateReportDetails to populate gateway results when bringing data in from the API" />
     <MESSAGE value="updates to allow for type of report (i.e. foundational, etc)" />
     <MESSAGE value="Adds License" />
-    <option name="LAST_COMMIT_MESSAGE" value="Adds License" />
+    <MESSAGE value="Updates Readme" />
+    <option name="LAST_COMMIT_MESSAGE" value="Updates Readme" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="494" y="197" key="CommitChangelistDialog2" timestamp="1576174560282">
+    <state x="494" y="197" key="CommitChangelistDialog2" timestamp="1576848826578">
       <screen x="67" y="0" width="1853" height="1200" />
     </state>
-    <state x="494" y="197" key="CommitChangelistDialog2/67.0.1853.1200/1920.0.1920.1200/3840.0.1920.1200@67.0.1853.1200" timestamp="1576174560282" />
-    <state x="585" y="335" key="Vcs.Push.Dialog.v2" timestamp="1576174565281">
+    <state x="494" y="197" key="CommitChangelistDialog2/67.0.1853.1200/1920.0.1920.1200/3840.0.1920.1200@67.0.1853.1200" timestamp="1576848826578" />
+    <state x="585" y="335" key="Vcs.Push.Dialog.v2" timestamp="1576174620610">
       <screen x="67" y="0" width="1853" height="1200" />
     </state>
-    <state x="585" y="335" key="Vcs.Push.Dialog.v2/67.0.1853.1200/1920.0.1920.1200/3840.0.1920.1200@67.0.1853.1200" timestamp="1576174565281" />
+    <state x="585" y="335" key="Vcs.Push.Dialog.v2/67.0.1853.1200/1920.0.1920.1200/3840.0.1920.1200@67.0.1853.1200" timestamp="1576174620610" />
+    <state x="919" y="433" width="789" height="574" key="find.popup" timestamp="1582840993820">
+      <screen x="67" y="0" width="2493" height="1440" />
+    </state>
+    <state x="700" y="361" width="586" height="478" key="find.popup/67.0.1853.1200/1920.0.1920.1200/3840.0.1920.1200@67.0.1853.1200" timestamp="1576848680237" />
+    <state x="919" y="433" width="789" height="574" key="find.popup/67.0.2493.1440/2560.0.2560.1440@67.0.2493.1440" timestamp="1582840993820" />
+    <state x="1138" y="588" key="publish.login" timestamp="1582838499587">
+      <screen x="67" y="0" width="2493" height="1440" />
+    </state>
+    <state x="863" y="490" key="publish.login/67.0.1853.1200/1920.0.1920.1200/3840.0.1920.1200@67.0.1853.1200" timestamp="1576863271322" />
+    <state x="1138" y="588" key="publish.login/67.0.2493.1440/2560.0.2560.1440@67.0.2493.1440" timestamp="1582838499587" />
   </component>
   <component name="WordPressConfiguration" enabled="true">
     <wordpressPath>C:\Users\david.hefley\wordpress-5.0.3</wordpressPath>
