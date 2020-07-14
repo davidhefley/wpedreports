@@ -72,7 +72,8 @@ function edreportnextpage_func()
             format_edseries($s, $status, $type);
         endforeach;
     else:
-        if ($page == 1) echo "<div class='noseriesfound'>No More Materials Found</div>";
+        if ($page == 1 ) echo "<div class='noseriesfound'>No More Reviews Found</div>";
+        elseif ( !empty($text) ) echo "<div class='noseriesfound'>No Reviews Found</div>";
     endif;
     die();
 }
@@ -330,6 +331,8 @@ function format_edseries($d, $statusFilter=[], $type='')
 {
     global $wpHelper;
     $full = $wpHelper->seriesDetails($d->id,'','none');
+
+    $techResponse = $wpHelper->getLatestTechResponse($full);
     ?>
     <div class='edrep_review' id='edrep_<?= $d->id; ?>'>
         <div class='edrep_title'>
@@ -352,6 +355,18 @@ function format_edseries($d, $statusFilter=[], $type='')
                             Go to <a href="<?= $full->series_url; ?>" target="_blank">EdReports.org</a> for detailed
                             information about alignment and usability
                         </div>
+	                    <?php if ( !empty($techResponse) ) { ?>
+							<div class="row techresponse">
+								<div class="col-xs-2">
+									<span class="fas fa-2x fa-info-circle"></span>
+								</div>
+								<div class="col-xs-10">
+									<a href="<?=$techResponse->file;?>" target="_blank">
+									   Enhanced technology information for COVID-19 planning available &gt;
+									</a>
+								</div>
+							</div>
+	                    <?php } ?>
                     </div>
                 </div>
                 <?php

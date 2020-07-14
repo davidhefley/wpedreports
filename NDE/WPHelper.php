@@ -1381,6 +1381,36 @@
 		}
 
 		/**
+		 * Parse through series publisher responses to extract latest technical report
+		 * @param $series
+		 */
+
+		public function getLatestTechResponse( $series ) {
+			$responses = unserialize($series->publisher_responses);
+			if ( empty($responses) ) return false;
+			$responses = array_filter($responses, function( $report ) {
+				return strpos( $report->file, "_Tech_" ) !== false;
+			});
+			if ( empty($responses) ) return false;
+
+
+
+			$dates = [];
+			foreach ( $responses as $index=>$report ) {
+				$parts = explode( "_Tech_", str_replace('.pdf','', $report->file) );
+				if ( count($parts) !== 2 ) return "";
+				$date_segment = explode('_', $parts[1] );
+				$dates[ $index ] = $date_segment[1] . $date_segment[0];
+			};
+			arsort( $dates );
+			foreach( $dates as $index=>$date ) {
+				return $responses[ $index ];
+			}
+			return false;
+
+		}
+
+		/**
 		 * Retrieve data from appropriate cache if enabled
 		 *
 		 * @param string $target
