@@ -759,6 +759,10 @@ add_action('nde_edreports_datapull_reporttypes_details', 'nde_edreports_datapull
 function nde_edreports_datapull_series_func($limit = 100, $forcereload = false, $age = 0)
 {
     error_log('Running ' . __FUNCTION__);
+    if ( defined('DISABLE_REPORT_SYNC') ) {
+    	error_log('Sync disabled');
+    	return;
+    }
     if (defined('DOING_CRON')) $debug = 1;
     else $debug = 2;
     $wpHelper = new NDE\WPHelper($debug);
@@ -769,6 +773,10 @@ function nde_edreports_datapull_series_func($limit = 100, $forcereload = false, 
 function nde_edreports_datapull_series_details_func($limit = 5)
 {
     error_log('Running ' . __FUNCTION__);
+	if ( defined('DISABLE_REPORT_SYNC') ) {
+		error_log('Sync disabled');
+		return;
+	}
     if (defined('DOING_CRON')) {
         $debug = 1;
         $limit = 100;
@@ -782,6 +790,10 @@ function nde_edreports_datapull_series_details_func($limit = 5)
 function nde_edreports_datapull_reports_func($limit = 100, $forcereload = false, $age = 0)
 {
     error_log('Running ' . __FUNCTION__);
+	if ( defined('DISABLE_REPORT_SYNC') ) {
+		error_log('Sync disabled');
+		return;
+	}
     if (defined('DOING_CRON')) $debug = 1;
     else $debug = 2;
     $wpHelper = new NDE\WPHelper($debug);
@@ -792,6 +804,10 @@ function nde_edreports_datapull_reports_func($limit = 100, $forcereload = false,
 function nde_edreports_datapull_reports_details_func($limit = 15)
 {
     error_log('Running ' . __FUNCTION__);
+	if ( defined('DISABLE_REPORT_SYNC') ) {
+		error_log('Sync disabled');
+		return;
+	}
     if (defined('DOING_CRON')) $debug = 1;
     else $debug = 2;
     $wpHelper = new NDE\WPHelper($debug);
@@ -800,10 +816,13 @@ function nde_edreports_datapull_reports_details_func($limit = 15)
     return $results;
 }
 
-
 function nde_edreports_datapull_publishers_func($limit = 100, $forcereload = false)
 {
     error_log('Running ' . __FUNCTION__);
+	if ( defined('DISABLE_REPORT_SYNC') ) {
+		error_log('Sync disabled');
+		return;
+	}
     if (defined('DOING_CRON')) $debug = 1;
     else $debug = 2;
 
@@ -812,9 +831,41 @@ function nde_edreports_datapull_publishers_func($limit = 100, $forcereload = fal
     error_log('Finished');
 }
 
+function nde_edreports_datapull_grades_func()
+{
+	error_log('Running ' . __FUNCTION__);
+	if ( defined('DISABLE_REPORT_SYNC') ) {
+		error_log('Sync disabled');
+		return;
+	}
+	if (defined('DOING_CRON')) $debug = 1;
+	else $debug = 2;
+	$wpHelper = new NDE\WPHelper($debug);
+	$wpHelper->updateGrades();
+	error_log('Finished');
+}
+
+function nde_edreports_datapull_subjects_func()
+{
+	error_log('Running ' . __FUNCTION__);
+	if ( defined('DISABLE_REPORT_SYNC') ) {
+		error_log('Sync disabled');
+		return;
+	}
+	if (defined('DOING_CRON')) $debug = 1;
+	else $debug = 2;
+	$wpHelper = new NDE\WPHelper($debug);
+	$wpHelper->updateSubjects();
+	error_log('Finished');
+}
+
 function nde_edreports_datapull_reporttypes_details_func()
 {
     error_log('Running ' . __FUNCTION__);
+	if ( defined('DISABLE_REPORT_SYNC') ) {
+		error_log('Sync disabled');
+		return;
+	}
     if (defined('DOING_CRON')) $debug = 1;
     else $debug = 2;
     $wpHelper = new NDE\WPHelper($debug);
@@ -825,6 +876,10 @@ function nde_edreports_datapull_reporttypes_details_func()
 function nde_edreports_datapull_reporttypes_func()
 {
     error_log('Running ' . __FUNCTION__);
+	if ( defined('DISABLE_REPORT_SYNC') ) {
+		error_log('Sync disabled');
+		return;
+	}
     if (defined('DOING_CRON')) $debug = 1;
     else $debug = 2;
     $wpHelper = new NDE\WPHelper($debug);
@@ -832,43 +887,25 @@ function nde_edreports_datapull_reporttypes_func()
     error_log('Finished');
 }
 
-function nde_edreports_datapull_grades_func()
-{
-    error_log('Running ' . __FUNCTION__);
-    if (defined('DOING_CRON')) $debug = 1;
-    else $debug = 2;
-    $wpHelper = new NDE\WPHelper($debug);
-    $wpHelper->updateGrades();
-    error_log('Finished');
-}
-
-function nde_edreports_datapull_subjects_func()
-{
-    error_log('Running ' . __FUNCTION__);
-    if (defined('DOING_CRON')) $debug = 1;
-    else $debug = 2;
-    $wpHelper = new NDE\WPHelper($debug);
-    $wpHelper->updateSubjects();
-    error_log('Finished');
-}
 
 function nde_edreports_add_intervals($schedules)
-{
-    // add a 'weekly' interval
-    $schedules['weekly'] = array(
-        'interval' => 604800,
-        'display' => __('Once Weekly')
-    );
-    $schedules['monthly'] = array(
-        'interval' => 2635200,
-        'display' => __('Once a month')
-    );
-    $schedules['tenminutes'] = array(
-        'interval' => 600,
-        'display' => __('Every 10 Minutes')
-    );
-    return $schedules;
-}
+	{
+		// add a 'weekly' interval
+		$schedules['weekly'] = array(
+			'interval' => 604800,
+			'display' => __('Once Weekly')
+		);
+		$schedules['monthly'] = array(
+			'interval' => 2635200,
+			'display' => __('Once a month')
+		);
+		$schedules['tenminutes'] = array(
+			'interval' => 600,
+			'display' => __('Every 10 Minutes')
+		);
+		return $schedules;
+	}
+
 
 add_filter('cron_schedules', 'nde_edreports_add_intervals');
 

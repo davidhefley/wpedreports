@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="On explicit save action" serverName="COMDEV" createEmptyFolders="true" autoUploadExternalChanges="true" showNewOnTargetInSync="false">
+  <component name="PublishConfigData" autoUpload="On explicit save action" createEmptyFolders="true" autoUploadExternalChanges="true" showNewOnTargetInSync="false">
     <serverData>
       <paths name="COMDEV">
         <serverdata>
@@ -37,6 +37,27 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="LaunchNE">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="LaunchNE Legacy">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="LaunchNE Staging">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="NDE - PRODUCTION">
         <serverdata>
           <mappings>
@@ -51,7 +72,28 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="NDE Downloads">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="NDE Resources">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="NDEMAINSTAGING">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="NDEWEB31 (Staging)">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
@@ -72,21 +114,7 @@
           </mappings>
         </serverdata>
       </paths>
-      <paths name="NIMC - PRODUCTION (project level)">
-        <serverdata>
-          <mappings>
-            <mapping deploy="/wp-content/plugins/wpedreports" local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
       <paths name="NIMC - STAGING">
-        <serverdata>
-          <mappings>
-            <mapping deploy="/wp-content/plugins/wpedreports" local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="NIMC - STAGING (project level)">
         <serverdata>
           <mappings>
             <mapping deploy="/wp-content/plugins/wpedreports" local="$PROJECT_DIR$" web="/" />

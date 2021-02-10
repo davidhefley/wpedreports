@@ -20,12 +20,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4b617952-2137-4817-93ba-234645ef9799" name="Default Changelist" comment="Updates Readme">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/deployment.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/NDE/WPHelper.php" beforeDir="false" afterPath="$PROJECT_DIR$/NDE/WPHelper.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/css/nde_edreports.css" beforeDir="false" afterPath="$PROJECT_DIR$/assets/css/nde_edreports.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/css/nde_edreports.css.map" beforeDir="false" afterPath="$PROJECT_DIR$/assets/css/nde_edreports.css.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/scss/nde_edreports.scss" beforeDir="false" afterPath="$PROJECT_DIR$/assets/scss/nde_edreports.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/wpedreports.php" beforeDir="false" afterPath="$PROJECT_DIR$/wpedreports.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -68,7 +65,9 @@
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="settings.editor.selected.configurable" value="web.server" />
+    <property name="vue.rearranger.settings.migration" value="true" />
   </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -100,6 +99,7 @@
       <workItem from="1576863085010" duration="1214000" />
       <workItem from="1582838457337" duration="2588000" />
       <workItem from="1594640402331" duration="3439000" />
+      <workItem from="1612978097889" duration="1157000" />
     </task>
     <task id="LOCAL-00001" summary="Initial">
       <created>1548771736794</created>
@@ -182,7 +182,7 @@
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="2" />
+    <option name="version" value="3" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
@@ -209,28 +209,6 @@
     <MESSAGE value="Adds License" />
     <MESSAGE value="Updates Readme" />
     <option name="LAST_COMMIT_MESSAGE" value="Updates Readme" />
-  </component>
-  <component name="WindowStateProjectService">
-    <state width="1798" height="331" key="GridCell.Tab.0.bottom" timestamp="1594642455131">
-      <screen x="62" y="0" width="1858" height="1200" />
-    </state>
-    <state width="1798" height="331" key="GridCell.Tab.0.bottom/62.0.1858.1200/1920.0.1920.1200@62.0.1858.1200" timestamp="1594642455131" />
-    <state width="1798" height="331" key="GridCell.Tab.0.center" timestamp="1594642455130">
-      <screen x="62" y="0" width="1858" height="1200" />
-    </state>
-    <state width="1798" height="331" key="GridCell.Tab.0.center/62.0.1858.1200/1920.0.1920.1200@62.0.1858.1200" timestamp="1594642455130" />
-    <state width="1798" height="331" key="GridCell.Tab.0.left" timestamp="1594642455130">
-      <screen x="62" y="0" width="1858" height="1200" />
-    </state>
-    <state width="1798" height="331" key="GridCell.Tab.0.left/62.0.1858.1200/1920.0.1920.1200@62.0.1858.1200" timestamp="1594642455130" />
-    <state width="1798" height="331" key="GridCell.Tab.0.right" timestamp="1594642455131">
-      <screen x="62" y="0" width="1858" height="1200" />
-    </state>
-    <state width="1798" height="331" key="GridCell.Tab.0.right/62.0.1858.1200/1920.0.1920.1200@62.0.1858.1200" timestamp="1594642455131" />
-    <state x="697" y="394" width="587" height="534" key="find.popup" timestamp="1594640446010">
-      <screen x="62" y="0" width="1858" height="1200" />
-    </state>
-    <state x="697" y="394" width="587" height="534" key="find.popup/62.0.1858.1200/1920.0.1920.1200@62.0.1858.1200" timestamp="1594640446010" />
   </component>
   <component name="WordPressConfiguration" enabled="true">
     <wordpressPath>C:\Users\david.hefley\wordpress-5.0.3</wordpressPath>
